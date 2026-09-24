@@ -1,0 +1,6 @@
+{
+  "name": "james-init-repo",
+  "version": "1.0.0",
+  "description": "Initialise a repository with a standard baseline: AGENTS.md and agent pointer files, Project Narrative, ontology kit, AI-fingerprint PR check, .NET build workflow, CODEOWNERS and branch protection.",
+  "author": { "name": "James Mitchell" }
+}

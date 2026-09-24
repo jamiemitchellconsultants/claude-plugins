@@ -1,0 +1,11 @@
+{
+  "name": "james-plugins",
+  "owner": { "name": "James Mitchell" },
+  "plugins": [
+    {
+      "name": "james-init-repo",
+      "source": "./",
+      "description": "Standard repository baseline installer (/init-repo)."
+    }
+  ]
+}
