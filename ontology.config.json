@@ -1,0 +1,11 @@
+{
+  "ontologyPath": "docs/ontology.md",
+  "namespaceUri": "https://ontology.example/claude-plugins#",
+  "sections": {
+    "required": ["Entities", "Enums", "Relationships", "Business Rules & Invariants"],
+    "optional": ["External Systems", "Subsystems", "Aggregate Roots", "Value Objects", "Domain Events", "Use Cases"]
+  },
+  "allowlist": [],
+  "bannedAliases": [],
+  "ignorePaths": []
+}
