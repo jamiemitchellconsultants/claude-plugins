@@ -3,8 +3,8 @@ name: init-repo
 description: >
   Initialise a repository with James's standard baseline: a canonical AGENTS.md plus thin pointer
   files for the other AI agents, Project Narrative, the ontology kit, the AI-fingerprint PR check,
-  a docs-skipping .NET build workflow, CODEOWNERS, and GitHub branch protection requiring a
-  code-owner approval. Use whenever the user wants to set up, bootstrap, initialise, scaffold or
+  a docs-skipping .NET build workflow, CODEOWNERS, the feature lifecycle persona skills with their
+  feature-gate check, and GitHub branch protection requiring a code-owner approval. Use whenever the user wants to set up, bootstrap, initialise, scaffold or
   "apply the usual setup to" a new or existing repo, asks for the same setup as EventBooking or
   JointBooking, or invokes /init-repo — even if they only name one piece of it (for example "add
   narrative and protect main to this repo"), because the pieces depend on each other.
@@ -44,8 +44,13 @@ node ${CLAUDE_PLUGIN_ROOT}/skills/init-repo/scripts/init-files.mjs \
   --target <repo> --name <Name> --description "<one line>" --owner <handle> [--stack none] [--dry-run]
 ```
 
-Run `--dry-run` first on an existing repo. The script never overwrites: it reports each file as
-`created` or `kept`. If `AGENTS.md` already existed, merge the missing sections from
+For a repo that already has the baseline and only needs the feature lifecycle kit added or
+refreshed, run `node ${CLAUDE_PLUGIN_ROOT}/skills/init-repo/scripts/init-files.mjs --target <repo>
+--skills-only`. It needs no other options, runs no installers, and prints the AGENTS.md section to
+merge if the repo's AGENTS.md does not have it yet.
+
+Run `--dry-run` first on an existing repo. The script never overwrites the baseline files, except the lifecycle kit, which it refreshes: it
+reports each file as `created` or `kept` (`updated` for the kit). If `AGENTS.md` already existed, merge the missing sections from
 `assets/AGENTS.md.tmpl` by hand rather than replacing the user's instructions. It needs the
 Narrative checkout (`~/RiderProjects/Narrative`, falls back to `npx` from GitHub) and the ontology
 kit checkout (`~/RiderProjects/InternalOntology`); override with `--narrative` / `--ontology-kit`.
@@ -60,6 +65,7 @@ What it lays down, and why each piece exists:
 | `ai-fingerprint.yml` + PR template footer | Every PR body carries a hash of the branch diff. Narrative proposal PRs opened by `github-actions[bot]` on `automation/narrative-pr-*` are exempt; the bot cannot know the hash and its later body edit does not re-run the check. |
 | `dotnet-build.yml` (.NET only) | Skips docs-only changes with `paths-ignore`, cancels superseded runs, `no-build-check` label as an opt-out. Deliberately not a required check: a path-filtered required check that never runs leaves a PR pending forever. |
 | `CODEOWNERS` | With branch protection, requires the owner's approval. |
+| Feature lifecycle kit | The persona skills (`feature`, `feature-po`, `feature-analyst`, `feature-architect`, `feature-dev`, `feature-user`, `feature-park`) copied into `.claude/skills/`, `.agents/skills/` and `.kiro/skills/` so Claude Code, Codex, opencode and Kiro all find them; `scripts/feature*.mjs`, which hold every gate rule; and the `feature-gate` workflow. Unlike everything else here it is **overwritten** on each run (reported `updated`), because the copies must match this marketplace. opencode reads both `.claude/skills/` and `.agents/skills/`; the copies are identical and opencode keeps one per name (logging a duplicate warning), so this is harmless. |
 
 ## 3. Replace the placeholder ontology
 
@@ -85,9 +91,10 @@ node ~/RiderProjects/Narrative/bin/narrative.mjs check
 bash ${CLAUDE_PLUGIN_ROOT}/skills/init-repo/scripts/apply-github-settings.sh --repo <owner/name> [--stack none] [--dry-run]
 ```
 
-Creates the labels, sets Actions workflow permissions (Narrative opens PRs), and protects the
-default branch: PR required, one code-owner approval, `ai-fingerprint` required, `enforce_admins`
-off so the owner can override, no force-push or deletion. The branch must already exist on the
+Creates the labels (including `feature`, `side-issue`, `pushback`, `gate-override` and the five
+`phase:` labels), sets Actions workflow permissions (Narrative opens PRs), and protects the
+default branch: PR required, one code-owner approval, `ai-fingerprint` and `feature-gate`
+required, `enforce_admins` off so the owner can override the merge, no force-push or deletion. The branch must already exist on the
 remote. Report what changed; you cannot see GitHub's UI, so rely on the script's output.
 
 ## 5. Land it
@@ -124,6 +131,13 @@ is not in the ontology fails CI.
   installer with `--force` to refresh its scripts; adopter-owned files are left alone.
 - The older `/init-ontology` skill uses a different layout (`DevNotes/Ontology/`). This skill uses
   the kit's `docs/ontology.*`; do not run both.
+- A persona skill or `scripts/feature*.mjs` changed inside a target repo is overwritten by the next
+  `init-files.mjs` run. Make the change in this marketplace's `assets/lifecycle/` instead, then
+  refresh with `--skills-only`.
+- `feature-gate` becomes a required check in step 4. Install the kit (step 2) before applying the
+  settings, or every pull request waits for a check that never runs.
+- `feature-gate` runs on pull-request events only, so after a pushback or a checklist change the
+  open pull requests' checks stay as they were until re-run (`gh run rerun`) or the branch is pushed.
 
 ## Keeping this skill current
 
