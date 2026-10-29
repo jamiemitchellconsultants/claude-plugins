@@ -57,7 +57,11 @@ export function makeGh(runner = runGh) {
 
     linkedPullRequests(issueNumber) {
       const issue = json(["issue", "view", String(issueNumber), "--json", "closedByPullRequestsReferences"]);
-      return (issue.closedByPullRequestsReferences ?? []).map((pr) => ({ number: pr.number, state: lower(pr.state) }));
+      // closedByPullRequestsReferences carries no state, so each PR is looked up by URL (which also covers other repos).
+      return (issue.closedByPullRequestsReferences ?? []).map((ref) => {
+        const pr = json(["pr", "view", ref.url ?? String(ref.number), "--json", "state"]);
+        return { number: ref.number, state: lower(pr.state) };
+      });
     },
 
     viewIssue,
