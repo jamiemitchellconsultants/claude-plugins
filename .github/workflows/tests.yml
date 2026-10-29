@@ -1,0 +1,20 @@
+# Runs the init-repo and lifecycle kit tests. Needs no secrets and no network access.
+name: Tests
+
+on:
+  pull_request:
+  push:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node --test skills/init-repo/tests/*.test.mjs
