@@ -256,11 +256,15 @@ function gatePr(opts, { gh, out }) {
     out("gate-override label present: the feature gate is not enforced. Give the reason in the Narrative sections.");
     return 0;
   }
-  // feature number → the phase the PR is for (null means "its current phase").
+  // feature number → the phases the PR is for (null means "its current phase").
   const targets = new Map();
+  const addTarget = (number, phaseId) => {
+    if (!targets.has(number)) targets.set(number, new Set());
+    targets.get(number).add(phaseId);
+  };
   for (const number of closes) {
     const sub = parseSubIssue(gh.viewIssue(number).body);
-    if (sub?.parentNumber) targets.set(sub.parentNumber, sub.phaseId);
+    if (sub?.parentNumber) addTarget(sub.parentNumber, sub.phaseId);
   }
   const features = slugs.length > 0 ? gh.listFeatures() : [];
   for (const slug of slugs) {
@@ -269,20 +273,22 @@ function gatePr(opts, { gh, out }) {
       out(`no open feature for docs/features/${slug}/: skipped`);
       continue;
     }
-    if (!targets.has(feature.number)) targets.set(feature.number, null);
+    if (!targets.has(feature.number)) addTarget(feature.number, null);
   }
   let code = 0;
-  for (const [number, phaseId] of targets) {
+  for (const [number, phases] of targets) {
     const state = gh.loadFeature(number);
-    const phase = phaseId ?? currentPhase(state);
-    if (phase === null) {
-      out(`feature #${number}: all phases are done`);
-      continue;
+    for (const phaseId of phases) {
+      const phase = phaseId ?? currentPhase(state);
+      if (phase === null) {
+        out(`feature #${number}: all phases are done`);
+        continue;
+      }
+      const result = evaluateGate(state, phase);
+      out(`feature #${number}: gate ${result.open ? "open" : "closed"} for ${getPhase(phase).title}`);
+      for (const reason of result.reasons) out(`  - ${reason}`);
+      if (!result.open) code = 2;
     }
-    const result = evaluateGate(state, phase);
-    out(`feature #${number}: gate ${result.open ? "open" : "closed"} for ${getPhase(phase).title}`);
-    for (const reason of result.reasons) out(`  - ${reason}`);
-    if (!result.open) code = 2;
   }
   return code;
 }

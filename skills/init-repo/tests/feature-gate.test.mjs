@@ -87,3 +87,15 @@ test("workflow shape", () => {
   assert.ok(text.includes("GH_TOKEN: ${{ github.token }}"));
   assert.doesNotMatch(text, /`[A-Z][A-Za-z0-9]*[a-z][A-Za-z0-9]*`/);
 });
+
+test("gate-pr checks every closed sub-issue of a feature", () => {
+  const gh = fakeGh({
+    pr: { body: "Closes #13\nCloses #12", files: [], labels: [] },
+    issues: { 12: subIssue("architect", 1), 13: subIssue("analyst", 1) },
+    states: { 1: fullState(["po"]) },
+  });
+  const { code, output } = run(["gate-pr", "--pr", "9"], gh);
+  assert.equal(code, 2);
+  assert.match(output, /gate closed for \[Architect\] Structure/);
+  assert.match(output, /gate open for \[Analyst\] Behaviours/);
+});
