@@ -36,7 +36,7 @@ When something outside this phase's job comes up, park it with the feature-park 
 
 **Lite mode.** Lite pull requests close nothing: the parent issue's checklist carries the status.
 - The product owner, analyst and architect write their sections of `docs/features/<slug>/feature.md` on one branch, `feature/<slug>/design`. The architect opens the design pull request.
-- The developer's plan step opens the plan pull request from `feature/<slug>/plan`.
+- The developer's plan step opens the plan pull request from `feature/<slug>/plan`. The plan criteria are ticked only after that pull request has been reviewed and merged.
 - The developer's build step and the user share `feature/<slug>/build`. The user opens the build pull request.
 
 ## Handoff

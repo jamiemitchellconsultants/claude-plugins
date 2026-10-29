@@ -90,6 +90,6 @@ test("listSideIssues keeps only issues for this feature", () => {
 });
 
 test("viewPr flattens files and labels", () => {
-  const { gh } = scripted([["pr view 5", { body: "Closes #1", files: [{ path: "a.md" }], labels: [{ name: "x" }] }]]);
-  assert.deepEqual(gh.viewPr(5), { body: "Closes #1", files: ["a.md"], labels: ["x"] });
+  const { gh } = scripted([["pr view 5", { body: "Closes #1", files: [{ path: "a.md" }], labels: [{ name: "x" }], headRefName: "feature/demo/build" }]]);
+  assert.deepEqual(gh.viewPr(5), { body: "Closes #1", files: ["a.md"], labels: ["x"], head: "feature/demo/build" });
 });

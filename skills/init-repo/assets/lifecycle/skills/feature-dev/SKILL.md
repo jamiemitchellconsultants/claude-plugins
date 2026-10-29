@@ -44,7 +44,7 @@ Run `node scripts/feature.mjs status --feature <n>` to see which step is current
 1. Read `01-vision.md`, `02-behaviours.md`, `03-architecture.md` and the latest handoff.
 2. If superpowers is installed, use its writing-plans skill with those three files as the spec, saving the plan under `docs/superpowers/plans/<slug>/`. If superpowers is not installed, write the plan directly in `docs/superpowers/plans/<slug>/plan.md`. It needs a goal, the architecture, the global constraints, then numbered tasks, each with the files it touches, its interfaces, the tests that prove it and its commit.
 3. Write the detailed implementation plan under `docs/detailed-implementations/<slug>/`, exactly as the repo's AGENTS.md describes, with its task format, code fragments, and a commit and push for each task. If AGENTS.md says nothing about detailed plans, use the plan's task format with complete test files.
-4. Tick the plan criteria. Open the plan pull request, which closes [Dev] Plan in full mode, and post a handoff to the build step that says who will run it. Then stop: this is a checkpoint, and no code is written until the plan pull request has been reviewed and merged.
+4. Open the plan pull request, which closes [Dev] Plan in full mode. In full mode tick the plan criteria now; in lite mode tick them only after the plan pull request has been reviewed and merged. Post a handoff to the build step that says who will run it. Then stop: this is a checkpoint, and no code is written until the plan pull request has been reviewed and merged.
 
 ### Build step (dev-build)
 

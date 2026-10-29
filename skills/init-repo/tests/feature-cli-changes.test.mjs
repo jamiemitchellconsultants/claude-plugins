@@ -38,6 +38,7 @@ test("pushback full reopens and labels", () => {
   assert.equal(gh.calls[3][1], 12);
   assert.match(gh.calls[3][2], /Blocked by #11/);
   assert.match(output, /Checkpoint reached/);
+  assert.match(output, /feature-gate check does not re-run by itself: re-run it with gh run rerun or push to the branch/);
 });
 
 test("pushback must point at an earlier phase", () => {

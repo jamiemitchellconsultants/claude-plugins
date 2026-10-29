@@ -27,6 +27,17 @@ test("start full creates parent and six linked sub-issues", () => {
   assert.ok(existsSync(join(cwd, "docs/features/booking-reminders/.gitkeep")));
 });
 
+test("start rejects a malformed slug before any gh call", () => {
+  for (const slug of ["My_Feature", "../../x", "-a", "a--b", ""]) {
+    const gh = fakeGh();
+    const { code, output, cwd } = run(["start", "--name", "X", "--slug", slug], gh);
+    assert.equal(code, 1, slug);
+    assert.match(output, /--slug must match/);
+    assert.deepEqual(gh.calls, []);
+    assert.equal(existsSync(join(cwd, "docs")), false);
+  }
+});
+
 test("start lite creates only the parent", () => {
   const gh = fakeGh();
   const { code } = run(["start", "--name", "Small Fix", "--lite"], gh);

@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { renderParentBody, renderSubIssueBody } from "../assets/lifecycle/scripts/feature-lib.mjs";
-import { fullState } from "./helpers/fixtures.mjs";
+import { fullState, liteState } from "./helpers/fixtures.mjs";
 import { fakeGh, run } from "./helpers/fake-gh.mjs";
 
 const WORKFLOW = join(dirname(fileURLToPath(import.meta.url)), "../assets/lifecycle/workflows/feature-gate.yml");
@@ -77,12 +77,32 @@ test("gate-pr errors are not open", () => {
   assert.equal(code, 1);
 });
 
+test("lite gate-pr derives the phase from the head branch", () => {
+  const lite = (ids) => ({ 1: liteState(ids) });
+  const build = fakeGh({
+    pr: { body: "", files: ["docs/features/demo/feature.md"], labels: [], head: "feature/demo/build" },
+    features: [{ number: 1, title: "Feature: demo", body: renderParentBody({ name: "demo", slug: "demo", mode: "lite" }) }],
+    states: lite(["po"]),
+  });
+  assert.equal(run(["gate-pr", "--pr", "9"], build).code, 2);
+  const design = fakeGh({
+    pr: { body: "", files: ["docs/features/demo/feature.md"], labels: [], head: "feature/demo/design" },
+    features: [{ number: 1, title: "Feature: demo", body: renderParentBody({ name: "demo", slug: "demo", mode: "lite" }) }],
+    states: lite(["po", "analyst"]),
+  });
+  const result = run(["gate-pr", "--pr", "9"], design);
+  assert.equal(result.code, 0);
+  assert.match(result.output, /gate open for \[Architect\] Structure/);
+});
+
 test("workflow shape", () => {
   const text = readFileSync(WORKFLOW, "utf8");
   assert.match(text, /^name: feature-gate$/m);
   assert.match(text, /^ {2}feature-gate:$/m);
   for (const type of ["opened", "synchronize", "reopened", "edited", "labeled", "unlabeled"]) assert.ok(text.includes(type), type);
   for (const permission of ["contents: read", "issues: read", "pull-requests: read"]) assert.ok(text.includes(permission), permission);
+  assert.ok(text.includes("ref: ${{ github.event.pull_request.base.sha }}"));
+  assert.ok(text.includes("feature-gate: kit not installed on the base branch yet; passing"));
   assert.ok(text.includes("node scripts/feature.mjs gate-pr --pr ${{ github.event.pull_request.number }}"));
   assert.ok(text.includes("GH_TOKEN: ${{ github.token }}"));
   assert.doesNotMatch(text, /`[A-Z][A-Za-z0-9]*[a-z][A-Za-z0-9]*`/);

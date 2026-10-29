@@ -31,6 +31,8 @@ import {
 
 class UsageError extends Error {}
 
+const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+
 const FLAGS = new Set(["lite"]);
 
 function parseOptions(argv) {
@@ -77,6 +79,7 @@ function findSub(state, phaseId) {
 function start(opts, { gh, out, cwd }) {
   need(opts, "name");
   const slug = opts.slug ?? slugify(opts.name);
+  if (!SLUG.test(slug)) throw new UsageError(`--slug must match ${SLUG} (lowercase words joined by single hyphens)`);
   const mode = opts.lite ? "lite" : "full";
   const existing = gh.listFeatures().find((f) => parseParent(f.body)?.slug === slug);
   if (existing) {
@@ -163,6 +166,9 @@ function pushback(opts, { gh, out, cwd }) {
     gh.comment(current.number, `Blocked by #${earlier.number} (pushback from ${getPhase(from).title}).`);
   }
   out(`pushback recorded against ${getPhase(to).title}.`);
+  if (state.mode === "full") {
+    out("The blocked pull request's feature-gate check does not re-run by itself: re-run it with gh run rerun or push to the branch, so it reflects the pushback.");
+  }
   out(`Checkpoint reached: stop and take a break, then re-run ${nextSkill(to)} in amendment mode.`);
   return 0;
 }
@@ -245,9 +251,17 @@ function promote(opts, { gh, out }) {
   return 0;
 }
 
+const BRANCH_PHASE = { design: "architect", plan: "dev-plan", build: "dev-build" };
+
+function litePhaseFromBranch(head) {
+  const m = (head ?? "").match(/^feature\/[^/]+\/(design|plan|build)$/);
+  return m ? BRANCH_PHASE[m[1]] : null;
+}
+
 function gatePr(opts, { gh, out }) {
   need(opts, "pr");
-  const { phasePr, slugs, closes, override } = classifyPr(gh.viewPr(issueNumber(opts, "pr")));
+  const pr = gh.viewPr(issueNumber(opts, "pr"));
+  const { phasePr, slugs, closes, override } = classifyPr(pr);
   if (!phasePr) {
     out("not a phase PR: the feature gate does not apply");
     return 0;
@@ -279,7 +293,7 @@ function gatePr(opts, { gh, out }) {
   for (const [number, phases] of targets) {
     const state = gh.loadFeature(number);
     for (const phaseId of phases) {
-      const phase = phaseId ?? currentPhase(state);
+      const phase = phaseId ?? (state.mode === "lite" ? litePhaseFromBranch(pr.head) : null) ?? currentPhase(state);
       if (phase === null) {
         out(`feature #${number}: all phases are done`);
         continue;

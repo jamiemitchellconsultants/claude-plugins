@@ -58,8 +58,8 @@ export function makeGh(runner = runGh) {
     viewIssue,
 
     viewPr(number) {
-      const pr = json(["pr", "view", String(number), "--json", "body,files,labels"]);
-      return { body: pr.body ?? "", files: (pr.files ?? []).map((f) => f.path), labels: labelNames(pr.labels) };
+      const pr = json(["pr", "view", String(number), "--json", "body,files,labels,headRefName"]);
+      return { body: pr.body ?? "", files: (pr.files ?? []).map((f) => f.path), labels: labelNames(pr.labels), head: pr.headRefName ?? "" };
     },
 
     loadFeature(number) {
