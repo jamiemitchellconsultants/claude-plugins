@@ -8,7 +8,30 @@ This document records what was asked, what was decided, why, and what followed.
 
 | # | Date | Title | Kind | Decision summary |
 |---|---|---|---|---|
-
+| [1](#entry-feat-init-repo-feature-lifecycle-persona-skills-with-enforced-phase-gate) | 2026-10-29 | feat(init-repo): feature lifecycle persona skills with enforced phase gates | product | Ship the lifecycle as part of the per-repo `init-repo` kit rather than as a marketplace plugin, so every agent sees the same skills. |
 
 ---
 
+<a id="entry-feat-init-repo-feature-lifecycle-persona-skills-with-enforced-phase-gate"></a>
+
+## Entry 1 — 2026-10-29 — feat(init-repo): feature lifecycle persona skills with enforced phase gates
+
+*Kind: product. Status: accepted.*
+
+## Context
+
+Working straight from idea to code without role changes led to fatigue, skipped thinking and chasing side issues. The team shares persona skills, reviews each other's work, generates every artefact with AI (no hand edits), and uses four agents in order of precedence: Claude, Codex, Kiro, opencode. Handoffs needed to be visible to colleagues, and phase order needed enforcing rather than relying on discipline.
+
+## Decision
+
+Ship the lifecycle as part of the per-repo `init-repo` kit rather than as a marketplace plugin, so every agent sees the same skills. GitHub issues are the status source of truth (a parent feature issue with one sub-issue per phase, or a single checklist issue in lite mode); files under `docs/features/<slug>/` hold content. All gate logic lives in one deterministic script invoked by both skills and CI, using only the `gh` CLI. Pushback reopens an earlier phase; explicit ADRs are allowed; the developer phase stops after the detailed plans; acceptance has a scripted walkthrough and an executable test in both local and deployed environments. CODEOWNERS and the admin merge override are kept as they are. Rejected: per-agent skill variants (drift), MCP-based GitHub access (not available in every agent or in Actions), and an issue-event workflow to re-run checks after pushback (deferred for simplicity).
+
+## Consequences
+
+Phase PRs in target repos must close their phase sub-issue and pass `feature-gate`; a PR closing two phases of one feature is blocked until split, and an unreadable closing reference fails closed (`gate-override` is the escape hatch). Known gaps left open: pushback does not re-run an already-green check, a PR can still edit `feature-gate.yml` itself, a kit update is gated by the old script on the base, `promote` is not idempotent after a partial failure, and lite-mode phase detection relies on branch naming. opencode sees byte-identical duplicate skills from two install paths.
+
+---
+
+AI-Fingerprint: sha256:6f9fea1620e5
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
