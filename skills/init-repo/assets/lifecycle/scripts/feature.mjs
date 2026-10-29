@@ -138,7 +138,124 @@ function gate(opts, { gh, out }) {
   return result.open ? 0 : 2;
 }
 
-const COMMANDS = { start, status, gate };
+function readBodyFile(opts, cwd) {
+  need(opts, "body-file");
+  return readFileSync(resolve(cwd, opts["body-file"]), "utf8");
+}
+
+function pushback(opts, { gh, out, cwd }) {
+  need(opts, "feature", "from", "to");
+  const from = phaseOption(opts, "from");
+  const to = phaseOption(opts, "to");
+  if (phaseIndex(to) >= phaseIndex(from)) throw new UsageError("--to must be an earlier phase than --from");
+  const body = readBodyFile(opts, cwd);
+  const n = issueNumber(opts, "feature");
+  const state = gh.loadFeature(n);
+  if (state.mode === "lite") {
+    gh.editBody(n, untickSection(state.body, to));
+    gh.comment(n, body);
+  } else {
+    const earlier = findSub(state, to);
+    const current = findSub(state, from);
+    gh.comment(earlier.number, body);
+    gh.reopen(earlier.number);
+    gh.addLabels(earlier.number, ["pushback"]);
+    gh.comment(current.number, `Blocked by #${earlier.number} (pushback from ${getPhase(from).title}).`);
+  }
+  out(`pushback recorded against ${getPhase(to).title}.`);
+  out(`Checkpoint reached: stop and take a break, then re-run ${nextSkill(to)} in amendment mode.`);
+  return 0;
+}
+
+function park(opts, { gh, out, cwd }) {
+  need(opts, "feature", "title");
+  const n = issueNumber(opts, "feature");
+  const text = readBodyFile(opts, cwd);
+  const current = currentPhase(gh.loadFeature(n));
+  const during = current ? getPhase(current).title : "a completed feature";
+  const issue = gh.createIssue({
+    title: opts.title,
+    body: `Side issue of #${n}, noticed during ${during}.\n\n${text}`,
+    labels: ["side-issue"],
+  });
+  out(`parked as #${issue}. Back to ${during}.`);
+  return 0;
+}
+
+function handoff(opts, { gh, out, cwd }) {
+  need(opts, "feature");
+  const n = issueNumber(opts, "feature");
+  gh.comment(n, readBodyFile(opts, cwd));
+  out(`handoff posted on #${n}.`);
+  out("Checkpoint reached: stop here and take a break before the next role starts.");
+  return 0;
+}
+
+function tick(opts, { gh, out }) {
+  need(opts, "feature", "phase", "text");
+  const phaseId = phaseOption(opts, "phase");
+  const n = issueNumber(opts, "feature");
+  const state = gh.loadFeature(n);
+  const target = state.mode === "lite"
+    ? { number: n, body: state.body, section: getPhase(phaseId).title }
+    : { ...findSub(state, phaseId), section: null };
+  const result = tickItem(target.body, opts.text, target.section);
+  if (!result.found) throw new Error(`no exit criterion "${opts.text}" on ${getPhase(phaseId).title}`);
+  gh.editBody(target.number, result.body);
+  out(`ticked on #${target.number}: ${opts.text}`);
+  return 0;
+}
+
+function clearPushback(opts, { gh, out }) {
+  need(opts, "feature", "phase");
+  const phaseId = phaseOption(opts, "phase");
+  const state = gh.loadFeature(issueNumber(opts, "feature"));
+  if (state.mode === "lite") {
+    out("lite features carry no pushback label; nothing to clear");
+    return 0;
+  }
+  const sub = findSub(state, phaseId);
+  gh.removeLabels(sub.number, ["pushback"]);
+  out(`pushback cleared on ${getPhase(phaseId).title} (#${sub.number})`);
+  return 0;
+}
+
+function promote(opts, { gh, out }) {
+  need(opts, "feature");
+  const n = issueNumber(opts, "feature");
+  const state = gh.loadFeature(n);
+  if (state.mode !== "lite") throw new UsageError(`feature #${n} is already in full mode`);
+  const sections = parseLiteSections(state.body);
+  const children = PHASES.map((p) => {
+    const items = sections[p.id];
+    const done = items.length > 0 && items.every((i) => i.checked);
+    const ticked = new Set(items.filter((i) => i.checked).map((i) => i.text));
+    const number = gh.createIssue({
+      title: p.title,
+      body: renderSubIssueBody({ phaseId: p.id, parentNumber: n, mode: done ? "lite" : "full", ticked }),
+      labels: [p.label],
+    });
+    return { number, done };
+  });
+  for (const child of children) gh.addSubIssue(n, child.number);
+  for (const child of children.filter((c) => c.done)) gh.close(child.number);
+  gh.editBody(n, setParentMode(state.body, "full"));
+  out(`feature #${n} promoted to full mode. Regenerate docs/features/${state.slug}/feature.md as:`);
+  for (const file of FULL_ARTEFACTS) out(`  - docs/features/${state.slug}/${file}`);
+  return 0;
+}
+
+const COMMANDS = {
+  start,
+  status,
+  gate,
+  pushback,
+  park,
+  handoff,
+  tick,
+  "clear-pushback": clearPushback,
+  promote,
+};
 
 export const SUBCOMMANDS = Object.keys(COMMANDS);
 
