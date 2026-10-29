@@ -46,7 +46,7 @@
 :Skill a owl:Class ;
     rdfs:subClassOf kit:Entity ;
     rdfs:label "Skill" ;
-    rdfs:comment "A Claude Code skill shipped by a `Plugin`: a `SKILL.md` plus its `assets/` and `scripts/`. The only one today is `init-repo`." ;
+    rdfs:comment "A Claude Code skill shipped by a `Plugin`: a `SKILL.md` plus its `assets/` and `scripts/`. The only plugin skill today is `init-repo`; the persona skills belong to the `LifecycleKit` and are copied into each `TargetRepository` instead of being loaded from the plugin." ;
     kit:hasProperty "name" ;
     kit:hasProperty "description" ;
     kit:invariant "files under `assets/` are copies of mechanisms proven in a repository that uses them; when the mechanism changes there, the asset must be updated here too, or the next `TargetRepository` starts out stale." ;
@@ -66,7 +66,7 @@
 :Baseline a owl:Class ;
     rdfs:subClassOf kit:Entity ;
     rdfs:label "Baseline" ;
-    rdfs:comment "The standard set of pieces applied to a `TargetRepository`: `SteeringFile` and `PointerFile`s, `ProjectNarrative`, `OntologyKit`, the AI-fingerprint check, the .NET build workflow (for `Stack` dotnet only), CODEOWNERS, and the `GitHub` settings." ;
+    rdfs:comment "The standard set of pieces applied to a `TargetRepository`: `SteeringFile` and `PointerFile`s, `ProjectNarrative`, `OntologyKit`, the AI-fingerprint check, the .NET build workflow (for `Stack` dotnet only), CODEOWNERS, the `LifecycleKit`, and the `GitHub` settings." ;
     kit:invariant "is applied by running the installers, never by copying another repository, so that installer-owned scripts stay current and no other project's Narrative history or ontology is carried over." ;
     kit:invariant "GitHub settings are applied only after the user has explicitly agreed, because they change shared state." ;
     kit:definedIn "[init-repo SKILL.md](../skills/init-repo/SKILL.md)" .
@@ -157,4 +157,208 @@
     rdfs:domain :PointerFile ;
     rdfs:range :SteeringFile ;
     rdfs:label "pointsTo" ;
+    kit:cardinality "many → 1" .
+
+:Feature a owl:Class ;
+    rdfs:subClassOf kit:Entity ;
+    rdfs:label "Feature" ;
+    rdfs:comment "A unit of product work in a `TargetRepository`, taken through every `Phase` in order. Its status lives on a parent `GitHub` issue labelled `feature` whose body starts with the marker `<!-- feature: slug=<slug> mode=<mode> -->`; its content lives in `docs/features/<slug>/`." ;
+    kit:hasProperty "number" ;
+    kit:hasProperty "slug" ;
+    kit:hasProperty "mode" ;
+    kit:hasProperty "owner" ;
+    kit:invariant "has exactly one owner, who is accountable from vision to acceptance whether they do a `Phase` themselves or orchestrate colleagues or agents." ;
+    kit:invariant "issues are the source of truth for status and files for content; there is no separate state file." ;
+    kit:definedIn "[design](superpowers/specs/2026-10-29-feature-lifecycle-design.md)" .
+
+:Phase a owl:Class ;
+    rdfs:subClassOf kit:Entity ;
+    rdfs:label "Phase" ;
+    rdfs:comment "One stage of a `Feature`, owned by a `Persona`. In `FeatureMode` full it is a sub-issue of the parent issue whose body starts with `<!-- feature-phase: <id> -->` and holds the exit-criteria checklist; in lite it is a `###` section of the parent issue's checklist." ;
+    kit:hasProperty "id" ;
+    kit:hasProperty "title" ;
+    kit:hasProperty "label" ;
+    kit:hasProperty "exitCriteria" ;
+    kit:invariant "the current phase is the first one that is not done: an open sub-issue in full mode, a section with an unticked box in lite mode." ;
+    kit:definedIn "[design](superpowers/specs/2026-10-29-feature-lifecycle-design.md)" .
+
+:PersonaSkill a owl:Class ;
+    rdfs:subClassOf kit:Entity ;
+    rdfs:label "PersonaSkill" ;
+    rdfs:comment "A portable `SKILL.md` for one `Persona` (`feature-po`, `feature-analyst`, `feature-architect`, `feature-dev`, `feature-user`), part of the `LifecycleKit`. It opens with a role brief, checks the `Gate`, generates its `FeatureArtefact`, posts a `Handoff` and stops." ;
+    kit:hasProperty "name" ;
+    kit:hasProperty "description" ;
+    kit:invariant "never tells anyone to change an artefact by hand; review feedback and `Pushback` are applied by re-running the skill." ;
+    kit:invariant "never starts the next `Phase` itself: every `Handoff` is a checkpoint that stops and suggests a break." ;
+    kit:definedIn "[design](superpowers/specs/2026-10-29-feature-lifecycle-design.md)" .
+
+:Handoff a owl:Class ;
+    rdfs:subClassOf kit:Entity ;
+    rdfs:label "Handoff" ;
+    rdfs:comment "The templated comment a `PersonaSkill` posts on the parent issue at the end of its `Phase`: artefact link, summary, questions and assumptions passed on, decisions recorded, side issues parked." ;
+    kit:definedIn "[design](superpowers/specs/2026-10-29-feature-lifecycle-design.md)" .
+
+:Pushback a owl:Class ;
+    rdfs:subClassOf kit:Entity ;
+    rdfs:label "Pushback" ;
+    rdfs:comment "A later `Persona` reopening an earlier `Phase` because its artefact is wrong or incomplete. In full mode the earlier sub-issue is reopened and labelled `pushback`; in lite mode its section is unticked. It is resolved by an amendment PR." ;
+    kit:definedIn "[design](superpowers/specs/2026-10-29-feature-lifecycle-design.md)" .
+
+:Gate a owl:Class ;
+    rdfs:subClassOf kit:Entity ;
+    rdfs:label "Gate" ;
+    rdfs:comment "The rule that a `Phase` may start only when every earlier phase is done, fully ticked and free of `Pushback`. Evaluated by `feature.mjs gate` in the skills and by the required `feature-gate` check on pull requests." ;
+    kit:invariant "can be bypassed only by the `gate-override` label on a pull request, with the reason in its Narrative sections; the admin merge override does not open a gate." ;
+    kit:invariant "an error reading GitHub never counts as an open gate." ;
+    kit:definedIn "[design](superpowers/specs/2026-10-29-feature-lifecycle-design.md)" .
+
+:SideIssue a owl:Class ;
+    rdfs:subClassOf kit:Entity ;
+    rdfs:label "SideIssue" ;
+    rdfs:comment "A `GitHub` issue labelled `side-issue` that records something noticed during a `Feature` without working on it. Its body starts `Side issue of #<n>, noticed during <phase title>.`; it is never a sub-issue, so it does not affect the current `Phase`." ;
+    kit:definedIn "[design](superpowers/specs/2026-10-29-feature-lifecycle-design.md)" .
+
+:FeatureArtefact a owl:Class ;
+    rdfs:subClassOf kit:Entity ;
+    rdfs:label "FeatureArtefact" ;
+    rdfs:comment "A generated document in `docs/features/<slug>/`: `01-vision.md`, `02-behaviours.md`, `03-architecture.md`, `05-runbook.md`, `05-user-guide.md`, `05-acceptance.md` in full mode, or the single `feature.md` in lite mode." ;
+    kit:invariant "is generated from prompts and never changed by hand." ;
+    kit:definedIn "[design](superpowers/specs/2026-10-29-feature-lifecycle-design.md)" .
+
+:ArchitectureDecisionRecord a owl:Class ;
+    rdfs:subClassOf kit:Entity ;
+    rdfs:label "ArchitectureDecisionRecord" ;
+    rdfs:comment "An ADR written by the architect for each significant decision, at `docs/adr/NNNN-<title>.md` numbered across the whole repository, linked from `03-architecture.md` and from the PR's Narrative sections." ;
+    kit:definedIn "[design](superpowers/specs/2026-10-29-feature-lifecycle-design.md)" .
+
+:LifecycleKit a owl:Class ;
+    rdfs:subClassOf kit:Entity ;
+    rdfs:label "LifecycleKit" ;
+    rdfs:comment "The files `init-repo` owns and copies into a `TargetRepository`: every `PersonaSkill` plus the `feature` and `feature-park` skills (into `.claude/skills/`, `.agents/skills/` and `.kiro/skills/`), `scripts/feature*.mjs`, and `.github/workflows/feature-gate.yml`." ;
+    kit:invariant "is overwritten on every run of `init-files.mjs` (reported `updated`), unlike the rest of the `Baseline`; changes belong in this marketplace's assets." ;
+    kit:definedIn "[design](superpowers/specs/2026-10-29-feature-lifecycle-design.md)" .
+
+:FeatureMode a owl:Class ;
+    rdfs:subClassOf kit:Enum ;
+    rdfs:label "FeatureMode" ;
+    rdfs:comment "How much GitHub ceremony a `Feature` carries: full (a sub-issue and PR per `Phase`) or lite (one issue, one `feature.md`, three PRs)." .
+
+:FeatureMode_full a :FeatureMode ;
+    rdfs:label "full" .
+
+:FeatureMode_lite a :FeatureMode ;
+    rdfs:label "lite" .
+
+:Persona a owl:Class ;
+    rdfs:subClassOf kit:Enum ;
+    rdfs:label "Persona" ;
+    rdfs:comment "The role that owns a `Phase`. Each has its own `PersonaSkill`." .
+
+:Persona_po a :Persona ;
+    rdfs:label "po" .
+
+:Persona_analyst a :Persona ;
+    rdfs:label "analyst" .
+
+:Persona_architect a :Persona ;
+    rdfs:label "architect" .
+
+:Persona_dev a :Persona ;
+    rdfs:label "dev" .
+
+:Persona_user a :Persona ;
+    rdfs:label "user" .
+
+:PhaseId a owl:Class ;
+    rdfs:subClassOf kit:Enum ;
+    rdfs:label "PhaseId" ;
+    rdfs:comment "The id of a `Phase`, in order. The dev `Persona` owns two phases, so the plan is reviewed before any code is written." .
+
+:PhaseId_po a :PhaseId ;
+    rdfs:label "po" .
+
+:PhaseId_analyst a :PhaseId ;
+    rdfs:label "analyst" .
+
+:PhaseId_architect a :PhaseId ;
+    rdfs:label "architect" .
+
+:PhaseId_devPlan a :PhaseId ;
+    rdfs:label "dev-plan" .
+
+:PhaseId_devBuild a :PhaseId ;
+    rdfs:label "dev-build" .
+
+:PhaseId_user a :PhaseId ;
+    rdfs:label "user" .
+
+:RepositoryLabel_feature a :RepositoryLabel ;
+    rdfs:label "feature" .
+
+:RepositoryLabel_sideIssue a :RepositoryLabel ;
+    rdfs:label "side-issue" .
+
+:RepositoryLabel_pushback a :RepositoryLabel ;
+    rdfs:label "pushback" .
+
+:RepositoryLabel_gateOverride a :RepositoryLabel ;
+    rdfs:label "gate-override" .
+
+:RepositoryLabel_phasePo a :RepositoryLabel ;
+    rdfs:label "phase:po" .
+
+:RepositoryLabel_phaseAnalyst a :RepositoryLabel ;
+    rdfs:label "phase:analyst" .
+
+:RepositoryLabel_phaseArchitect a :RepositoryLabel ;
+    rdfs:label "phase:architect" .
+
+:RepositoryLabel_phaseDev a :RepositoryLabel ;
+    rdfs:label "phase:dev" .
+
+:RepositoryLabel_phaseUser a :RepositoryLabel ;
+    rdfs:label "phase:user" .
+
+:StartFeature a owl:Class ;
+    rdfs:subClassOf kit:UseCase ;
+    rdfs:label "StartFeature" ;
+    rdfs:comment "Creates a `Feature`'s parent issue and, in full mode, one sub-issue per `Phase` linked to it, then the `docs/features/<slug>/` folder. Refuses a slug that an open feature already uses." ;
+    kit:actor "Feature owner, through the `feature` skill" ;
+    kit:definedIn "[design](superpowers/specs/2026-10-29-feature-lifecycle-design.md)" .
+
+:ApplyLifecycleKit a owl:Class ;
+    rdfs:subClassOf kit:UseCase ;
+    rdfs:label "ApplyLifecycleKit" ;
+    rdfs:comment "Copies the `LifecycleKit` into a `TargetRepository`, overwriting earlier copies. Runs as part of `ApplyFiles`, or alone with `--skills-only`." ;
+    kit:actor "Agent running the `init-repo` skill" ;
+    kit:definedIn "[init-files.mjs](../skills/init-repo/scripts/init-files.mjs)" .
+
+:hasPhase a owl:ObjectProperty ;
+    rdfs:domain :Feature ;
+    rdfs:range :Phase ;
+    rdfs:label "hasPhase" ;
+    kit:cardinality "1 → many" .
+
+:ownedBy a owl:ObjectProperty ;
+    rdfs:domain :Phase ;
+    rdfs:range :Persona ;
+    rdfs:label "ownedBy" ;
+    kit:cardinality "many → 1" .
+
+:partOf a owl:ObjectProperty ;
+    rdfs:domain :LifecycleKit ;
+    rdfs:range :Baseline ;
+    rdfs:label "partOf" ;
+    kit:cardinality "1 → 1" .
+
+:raisedAgainst a owl:ObjectProperty ;
+    rdfs:domain :Pushback ;
+    rdfs:range :Phase ;
+    rdfs:label "raisedAgainst" ;
+    kit:cardinality "many → 1" .
+
+:parkedFrom a owl:ObjectProperty ;
+    rdfs:domain :SideIssue ;
+    rdfs:range :Feature ;
+    rdfs:label "parkedFrom" ;
     kit:cardinality "many → 1" .
