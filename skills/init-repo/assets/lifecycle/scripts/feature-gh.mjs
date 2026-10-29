@@ -55,6 +55,11 @@ export function makeGh(runner = runGh) {
         .map(({ number, title }) => ({ number, title }));
     },
 
+    linkedPullRequests(issueNumber) {
+      const issue = json(["issue", "view", String(issueNumber), "--json", "closedByPullRequestsReferences"]);
+      return (issue.closedByPullRequestsReferences ?? []).map((pr) => ({ number: pr.number, state: lower(pr.state) }));
+    },
+
     viewIssue,
 
     viewPr(number) {

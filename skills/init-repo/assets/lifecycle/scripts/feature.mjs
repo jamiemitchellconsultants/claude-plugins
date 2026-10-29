@@ -127,7 +127,12 @@ function status(opts, { gh, out }) {
   }
   const result = evaluateGate(state, current);
   out(`current phase: ${getPhase(current).title}`);
-  out(result.open ? `next: run the ${nextSkill(current)} skill` : "next: the gate is closed, because:");
+  const currentSub = subIssueFor(state, current);
+  const linked = currentSub ? gh.linkedPullRequests(currentSub.number) : [];
+  for (const pr of linked) out(`pull request: #${pr.number} (${pr.state})`);
+  const waiting = linked.find((pr) => pr.state === "open");
+  if (waiting) out(`next: wait for review of #${waiting.number}, then merge it`);
+  else out(result.open ? `next: run the ${nextSkill(current)} skill` : "next: the gate is closed, because:");
   for (const reason of result.reasons) out(`  - ${reason}`);
   return 0;
 }

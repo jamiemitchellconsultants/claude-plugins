@@ -65,7 +65,7 @@ const PHASE_MARKER = /<!--\s*feature-phase:\s*([a-z-]+)\s*-->/;
 const PHASE_OF = /Phase of #(\d+)\./;
 const CHECKBOX = /^(\s*[-*+]\s+)\[([ xX])\]\s+(.*?)\s*$/;
 const HEADING = /^#{1,6}\s+(.*?)\s*$/;
-const CLOSING = /\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#(\d+)/gi;
+const CLOSING = /\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?):?\s+(?:(?:[\w.-]+\/[\w.-]+#)|(?:https:\/\/github\.com\/[\w.-]+\/[\w.-]+\/issues\/)|#)(\d+)/gi;
 const FEATURE_PATH = /^docs\/features\/([^/]+)\//;
 
 const normalise = (text) => text.replace(/\s+/g, " ").trim();
@@ -225,12 +225,16 @@ export function evaluateGate(state, phaseId) {
     }
     const sub = subIssueFor(state, p.id);
     if (!sub) {
-      reasons.push(`${p.title} has no sub-issue on feature #${state.number}. Recreate it with the feature skill.`);
+      reasons.push(`${p.title} has no sub-issue on feature #${state.number}. It may have been deleted or not linked; link or recreate it on GitHub as a sub-issue of #${state.number}.`);
       continue;
     }
     if (sub.state !== "closed") reasons.push(`${p.title} (#${sub.number}) is still open. Merge the PR that closes it first.`);
     if (sub.labels.includes("pushback")) {
-      reasons.push(`${p.title} (#${sub.number}) has pushback. Re-run ${nextSkill(p.id)} in amendment mode.`);
+      reasons.push(
+        sub.state === "closed"
+          ? `${p.title} (#${sub.number}) has pushback but is closed. Run node scripts/feature.mjs clear-pushback --feature ${state.number} --phase ${p.id} once its amendment has merged.`
+          : `${p.title} (#${sub.number}) has pushback. Re-run ${nextSkill(p.id)} in amendment mode.`,
+      );
     }
     for (const i of parseChecklist(sub.body).filter((x) => !x.checked)) {
       reasons.push(`${p.title} (#${sub.number}) has an unticked exit criterion: "${i.text}". Tick it once it is met.`);

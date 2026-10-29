@@ -154,10 +154,17 @@ test("gate closed on unticked criterion", () => {
 });
 
 test("gate closed on pushback", () => {
+  const state = fullState(["analyst"], { po: { labels: ["phase:po", "pushback"] } });
+  const result = evaluateGate(state, "architect");
+  assert.equal(result.open, false);
+  assert.ok(result.reasons.some((r) => r.includes("pushback") && r.includes("feature-po") && r.includes("amendment mode")));
+});
+
+test("gate closed on pushback left on a closed sub-issue says how to clear it", () => {
   const state = fullState(["po", "analyst"], { po: { labels: ["phase:po", "pushback"] } });
   const result = evaluateGate(state, "architect");
   assert.equal(result.open, false);
-  assert.ok(result.reasons.some((r) => r.includes("pushback") && r.includes("feature-po")));
+  assert.ok(result.reasons.some((r) => r.includes("has pushback but is closed") && r.includes("clear-pushback --feature 1 --phase po")));
 });
 
 test("gate open", () => {
@@ -170,7 +177,7 @@ test("gate closed when a sub-issue is missing", () => {
   state.subIssues = state.subIssues.filter((s) => s.phaseId !== "po");
   const result = evaluateGate(state, "analyst");
   assert.equal(result.open, false);
-  assert.ok(result.reasons.some((r) => r.includes("[PO] Vision") && r.includes("no sub-issue")));
+  assert.ok(result.reasons.some((r) => r.includes("[PO] Vision") && r.includes("no sub-issue") && r.includes("as a sub-issue of #1")));
 });
 
 test("lite gate follows the checklist", () => {
@@ -194,6 +201,11 @@ test("classifyPr reads closing keywords", () => {
   const result = classifyPr({ body: "Closes #12\nfixes #13 and Resolved #14. See #15.", files: [], labels: [] });
   assert.deepEqual(result.closes, [12, 13, 14]);
   assert.equal(result.phasePr, true);
+});
+
+test("classifyPr reads colon, cross-repo and URL closing references", () => {
+  const body = "Closes: #1\nFixes acme/widgets#2\nresolved https://github.com/acme/widgets/issues/3\nCloses: acme/widgets#4";
+  assert.deepEqual(classifyPr({ body, files: [], labels: [] }).closes, [1, 2, 3, 4]);
 });
 
 test("classifyPr non-phase", () => {

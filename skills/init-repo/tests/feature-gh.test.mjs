@@ -89,6 +89,12 @@ test("listSideIssues keeps only issues for this feature", () => {
   assert.deepEqual(gh.listSideIssues(12), [{ number: 7, title: "a" }]);
 });
 
+test("linkedPullRequests maps closing references", () => {
+  const { gh, calls } = scripted([["issue view 14", { closedByPullRequestsReferences: [{ number: 30, state: "OPEN" }, { number: 31, state: "MERGED" }] }]]);
+  assert.deepEqual(gh.linkedPullRequests(14), [{ number: 30, state: "open" }, { number: 31, state: "merged" }]);
+  assert.ok(calls[0].includes("closedByPullRequestsReferences"));
+});
+
 test("viewPr flattens files and labels", () => {
   const { gh } = scripted([["pr view 5", { body: "Closes #1", files: [{ path: "a.md" }], labels: [{ name: "x" }], headRefName: "feature/demo/build" }]]);
   assert.deepEqual(gh.viewPr(5), { body: "Closes #1", files: ["a.md"], labels: ["x"], head: "feature/demo/build" });

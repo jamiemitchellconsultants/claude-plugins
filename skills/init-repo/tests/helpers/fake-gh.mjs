@@ -9,7 +9,7 @@ export function tempDir() {
 
 // A stand-in for makeGh(): returns canned data and records every write in calls.
 // New issues are numbered from 100. failWith makes every method throw that message.
-export function fakeGh({ features = [], states = {}, issues = {}, pr, sideIssues = [], failWith } = {}) {
+export function fakeGh({ features = [], states = {}, issues = {}, pr, sideIssues = [], linkedPrs = {}, failWith } = {}) {
   const calls = [];
   let nextNumber = 100;
   const guard = (fn) => (...args) => {
@@ -28,6 +28,7 @@ export function fakeGh({ features = [], states = {}, issues = {}, pr, sideIssues
     addSubIssue: record("addSubIssue"),
     listFeatures: guard(() => features),
     listSideIssues: guard(() => sideIssues),
+    linkedPullRequests: guard((n) => linkedPrs[n] ?? []),
     viewIssue: guard((n) => issues[n] ?? { number: n, title: "", body: "", state: "open", labels: [] }),
     viewPr: guard(() => pr ?? { body: "", files: [], labels: [] }),
     loadFeature: guard((n) => {

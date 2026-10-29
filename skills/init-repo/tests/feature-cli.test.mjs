@@ -103,6 +103,21 @@ test("status reports current phase and next step", () => {
   assert.match(output, /side issue: #77 Flaky date parsing/);
 });
 
+test("status shows the open pull request on the current phase", () => {
+  const gh = fakeGh({ states: { 1: fullState(["po", "analyst"]) }, linkedPrs: { 12: [{ number: 40, state: "open" }] } });
+  const { output } = run(["status", "--feature", "1"], gh);
+  assert.match(output, /pull request: #40 \(open\)/);
+  assert.match(output, /next: wait for review of #40, then merge it/);
+  assert.doesNotMatch(output, /run the feature-architect skill/);
+});
+
+test("status with only a merged or no pull request still says to run the skill", () => {
+  const gh = fakeGh({ states: { 1: fullState(["po", "analyst"]) }, linkedPrs: { 12: [{ number: 41, state: "merged" }] } });
+  const { output } = run(["status", "--feature", "1"], gh);
+  assert.match(output, /pull request: #41 \(merged\)/);
+  assert.match(output, /next: run the feature-architect skill/);
+});
+
 test("status reports pushback", () => {
   const gh = fakeGh({ states: { 1: fullState(["analyst"], { po: { labels: ["phase:po", "pushback"] } }) } });
   const { output } = run(["status", "--feature", "1"], gh);
