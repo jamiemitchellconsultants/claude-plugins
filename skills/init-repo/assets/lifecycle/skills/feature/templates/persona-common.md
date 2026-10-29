@@ -41,7 +41,7 @@ When something outside this phase's job comes up, park it with the feature-park 
 
 ## Handoff
 
-Fill in `templates/handoff.md` from the feature skill's folder, write it to a scratch file, and post it:
+Fill in `../feature/templates/handoff.md` (relative to the persona skill's folder), write it to a scratch file, and post it:
 
 `node scripts/feature.mjs handoff --feature <n> --body-file <file>`
 
@@ -52,7 +52,7 @@ After the handoff, stop. Tell the user plainly that this is a checkpoint: the ph
 ## Review feedback
 
 Reviewers write their comments as steering, not as changes to files. To apply them:
-1. Read the pull request's review comments with `gh pr view <pr> --comments`.
+1. Read the pull request's review comments: `gh pr view <pr> --comments` for the review summaries and conversation, and `gh api repos/{owner}/{repo}/pulls/<pr>/comments` for the inline comments on lines.
 2. Regenerate the affected parts of the artefact from them.
 3. Commit and push to the same branch, and recompute the fingerprint.
 4. Reply on the pull request saying what changed.
@@ -62,7 +62,7 @@ Nobody changes an artefact directly: every change comes from re-running a skill.
 ## Pushback
 
 **Raising it.** When this phase finds a problem that belongs to an earlier phase, do not decide it here.
-1. Fill in `templates/pushback.md` and write it to a scratch file.
+1. Fill in `../feature/templates/pushback.md` and write it to a scratch file.
 2. Run `node scripts/feature.mjs pushback --feature <n> --from <this phase> --to <earlier phase> --body-file <file>`.
 
 That reopens the earlier phase. Recording pushback is a checkpoint, so stop and suggest a break.
