@@ -131,7 +131,7 @@
 :ApplyGitHubSettings a owl:Class ;
     rdfs:subClassOf kit:UseCase ;
     rdfs:label "ApplyGitHubSettings" ;
-    rdfs:comment "Creates each `RepositoryLabel`, sets Actions workflow permissions, and protects the default branch (PR required, one code-owner approval, `ai-fingerprint` required, admins not enforced, no force-push or deletion). Supports `--dry-run`." ;
+    rdfs:comment "Creates each `RepositoryLabel` (including the lifecycle labels), sets Actions workflow permissions, and protects the default branch (PR required, one code-owner approval, `ai-fingerprint` and `feature-gate` required, admins not enforced, no force-push or deletion). Supports `--dry-run`." ;
     kit:actor "Agent running the `init-repo` skill, after the user agrees" ;
     kit:definedIn "[apply-github-settings.sh](../skills/init-repo/scripts/apply-github-settings.sh)" .
 

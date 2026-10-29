@@ -70,7 +70,7 @@ error.
 | Name | Actor | Description |
 | --- | --- | --- |
 | `ApplyFiles` | Agent running the `init-repo` skill | Writes the `Baseline` files into a `TargetRepository` and runs the `ProjectNarrative` and `OntologyKit` installers. Supports `--dry-run`. |
-| `ApplyGitHubSettings` | Agent running the `init-repo` skill, after the user agrees | Creates each `RepositoryLabel`, sets Actions workflow permissions, and protects the default branch (PR required, one code-owner approval, `ai-fingerprint` required, admins not enforced, no force-push or deletion). Supports `--dry-run`. |
+| `ApplyGitHubSettings` | Agent running the `init-repo` skill, after the user agrees | Creates each `RepositoryLabel` (including the lifecycle labels), sets Actions workflow permissions, and protects the default branch (PR required, one code-owner approval, `ai-fingerprint` and `feature-gate` required, admins not enforced, no force-push or deletion). Supports `--dry-run`. |
 | `StartFeature` | Feature owner, through the `feature` skill | Creates a `Feature`'s parent issue and, in full mode, one sub-issue per `Phase` linked to it, then the `docs/features/<slug>/` folder. Refuses a slug that an open feature already uses. |
 | `ApplyLifecycleKit` | Agent running the `init-repo` skill | Copies the `LifecycleKit` into a `TargetRepository`, overwriting earlier copies. Runs as part of `ApplyFiles`, or alone with `--skills-only`. |
 

@@ -15,7 +15,7 @@
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
-import { dirname, join, relative, resolve } from "node:path";
+import { dirname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const SKILL_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -103,14 +103,16 @@ function writeKitFile(dest, content) {
   report.push(`${outcome.padEnd(8)} ${dest}`);
 }
 
+const walkKit = (dir) => walk(dir).filter((file) => !relative(dir, file).split(sep).some((part) => part.startsWith(".")));
+
 function installLifecycleKit() {
   console.log("\nFeature lifecycle kit");
   const skills = join(KIT, "skills");
-  for (const file of walk(skills)) {
+  for (const file of walkKit(skills)) {
     for (const dir of SKILL_DIRS) writeKitFile(join(dir, relative(skills, file)), readFileSync(file));
   }
   const scripts = join(KIT, "scripts");
-  for (const file of walk(scripts)) writeKitFile(join("scripts", relative(scripts, file)), readFileSync(file));
+  for (const file of walkKit(scripts)) writeKitFile(join("scripts", relative(scripts, file)), readFileSync(file));
   writeKitFile(".github/workflows/feature-gate.yml", readFileSync(join(KIT, "workflows", "feature-gate.yml")));
 }
 

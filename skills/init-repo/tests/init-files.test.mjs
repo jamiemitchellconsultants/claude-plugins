@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { existsSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -77,6 +77,20 @@ test("non-git target fails", () => {
   const { code, output } = initFiles("--target", dir, "--skills-only");
   assert.notEqual(code, 0);
   assert.match(output, /is not a git repository/);
+});
+
+test("kit installation skips dotfiles such as .DS_Store", () => {
+  const stray = join(KIT, "scripts", ".DS_Store");
+  writeFileSync(stray, "junk");
+  try {
+    const dir = repo();
+    assert.equal(initFiles("--target", dir, "--skills-only").code, 0);
+    assert.equal(existsSync(join(dir, "scripts", ".DS_Store")), false);
+    const installed = [".claude/skills", ".agents/skills", ".kiro/skills", "scripts"].flatMap((d) => readdirSync(join(dir, d), { recursive: true }));
+    assert.deepEqual(installed.filter((p) => p.split("/").some((s) => s.startsWith("."))), []);
+  } finally {
+    rmSync(stray, { force: true });
+  }
 });
 
 test("dry run writes nothing", () => {

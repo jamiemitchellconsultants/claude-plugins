@@ -49,8 +49,8 @@ refreshed, run `node ${CLAUDE_PLUGIN_ROOT}/skills/init-repo/scripts/init-files.m
 --skills-only`. It needs no other options, runs no installers, and prints the AGENTS.md section to
 merge if the repo's AGENTS.md does not have it yet.
 
-Run `--dry-run` first on an existing repo. The script never overwrites: it reports each file as
-`created` or `kept`. If `AGENTS.md` already existed, merge the missing sections from
+Run `--dry-run` first on an existing repo. The script never overwrites the baseline files, except the lifecycle kit, which it refreshes: it
+reports each file as `created` or `kept` (`updated` for the kit). If `AGENTS.md` already existed, merge the missing sections from
 `assets/AGENTS.md.tmpl` by hand rather than replacing the user's instructions. It needs the
 Narrative checkout (`~/RiderProjects/Narrative`, falls back to `npx` from GitHub) and the ontology
 kit checkout (`~/RiderProjects/InternalOntology`); override with `--narrative` / `--ontology-kit`.
@@ -65,7 +65,7 @@ What it lays down, and why each piece exists:
 | `ai-fingerprint.yml` + PR template footer | Every PR body carries a hash of the branch diff. Narrative proposal PRs opened by `github-actions[bot]` on `automation/narrative-pr-*` are exempt; the bot cannot know the hash and its later body edit does not re-run the check. |
 | `dotnet-build.yml` (.NET only) | Skips docs-only changes with `paths-ignore`, cancels superseded runs, `no-build-check` label as an opt-out. Deliberately not a required check: a path-filtered required check that never runs leaves a PR pending forever. |
 | `CODEOWNERS` | With branch protection, requires the owner's approval. |
-| Feature lifecycle kit | The persona skills (`feature`, `feature-po`, `feature-analyst`, `feature-architect`, `feature-dev`, `feature-user`, `feature-park`) copied into `.claude/skills/`, `.agents/skills/` and `.kiro/skills/` so Claude Code, Codex, opencode and Kiro all find them; `scripts/feature*.mjs`, which hold every gate rule; and the `feature-gate` workflow. Unlike everything else here it is **overwritten** on each run (reported `updated`), because the copies must match this marketplace. |
+| Feature lifecycle kit | The persona skills (`feature`, `feature-po`, `feature-analyst`, `feature-architect`, `feature-dev`, `feature-user`, `feature-park`) copied into `.claude/skills/`, `.agents/skills/` and `.kiro/skills/` so Claude Code, Codex, opencode and Kiro all find them; `scripts/feature*.mjs`, which hold every gate rule; and the `feature-gate` workflow. Unlike everything else here it is **overwritten** on each run (reported `updated`), because the copies must match this marketplace. opencode reads both `.claude/skills/` and `.agents/skills/`; the copies are identical and opencode keeps one per name (logging a duplicate warning), so this is harmless. |
 
 ## 3. Replace the placeholder ontology
 
@@ -136,6 +136,8 @@ is not in the ontology fails CI.
   refresh with `--skills-only`.
 - `feature-gate` becomes a required check in step 4. Install the kit (step 2) before applying the
   settings, or every pull request waits for a check that never runs.
+- `feature-gate` runs on pull-request events only, so after a pushback or a checklist change the
+  open pull requests' checks stay as they were until re-run (`gh run rerun`) or the branch is pushed.
 
 ## Keeping this skill current
 
