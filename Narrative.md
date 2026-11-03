@@ -9,6 +9,7 @@ This document records what was asked, what was decided, why, and what followed.
 | # | Date | Title | Kind | Decision summary |
 |---|---|---|---|---|
 | [1](#entry-feat-init-repo-feature-lifecycle-persona-skills-with-enforced-phase-gate) | 2026-10-29 | feat(init-repo): feature lifecycle persona skills with enforced phase gates | product | Ship the lifecycle as part of the per-repo `init-repo` kit rather than as a marketplace plugin, so every agent sees the same skills. |
+| [2](#entry-docs-add-mit-license-and-describe-the-skills-in-the-readme) | 2026-10-29 | docs: add MIT license and describe the skills in the README | product | License the repository under MIT and make it public. The README now lists every skill with its purpose. |
 
 ---
 
@@ -33,5 +34,38 @@ Phase PRs in target repos must close their phase sub-issue and pass `feature-gat
 ---
 
 AI-Fingerprint: sha256:6f9fea1620e5
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+---
+
+<a id="entry-docs-add-mit-license-and-describe-the-skills-in-the-readme"></a>
+
+## Entry 2 — 2026-10-29 — docs: add MIT license and describe the skills in the README
+
+*Kind: product. Status: accepted.*
+
+## Context
+
+The marketplace was private, so installing the plugin needed read access to the repo. It had no
+licence, and its README said little about what each skill does. Opening it up needs both a
+licence and a README a stranger can read.
+
+## Decision
+
+License the repository under MIT and make it public. The README now lists every skill with its
+purpose. Branch protection stays as it is: one code-owner approval, `ai-fingerprint` required,
+and `enforce_admins` off so the owner can override. Apache-2.0 was considered and not chosen,
+because MIT is shorter and the project has no patent concerns.
+
+## Consequences
+
+Anyone can install, fork and reuse the plugin. The commit history, including author emails, is
+now public. The `init-repo` dependency notes still assume local checkouts under
+`~/RiderProjects`, with flags to override them.
+
+---
+
+AI-Fingerprint: sha256:eb443d3a0bc6
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
