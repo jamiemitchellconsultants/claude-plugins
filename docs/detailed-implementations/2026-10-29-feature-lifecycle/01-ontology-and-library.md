@@ -634,10 +634,12 @@ export const EXIT_CRITERIA = {
   ],
   "dev-plan": [
     item("a superpowers plan exists", true),
+    item("the plan opens with its increments, and every behaviour id belongs to exactly one increment", true),
     item("the detailed implementation plan exists, following the target repo's convention", true),
   ],
   "dev-build": [
     item("every task in the detailed plan is executed and committed", true),
+    item("each increment ended with green CI, a handoff and a stop before the next began", true),
     item("tests pass", true),
   ],
   user: [

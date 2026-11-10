@@ -219,9 +219,11 @@ These are draft checklists. Each persona skill shows its own list and ticks the 
   - each significant decision has an ADR, linked from the Narrative sections *(lite)*.
 - **Dev, plan:**
   - a superpowers plan exists *(lite)*;
+  - the plan opens with its increments, and every behaviour id belongs to exactly one increment *(lite)*;
   - the detailed implementation plan exists, following the target repo's convention *(lite)*.
 - **Dev, build:**
   - every task in the detailed plan is executed and committed *(lite)*;
+  - each increment ended with green CI, a handoff and a stop before the next began *(lite)*;
   - tests pass *(lite)*.
 - **User:**
   - the runbook covers deploy, operate and recover;
