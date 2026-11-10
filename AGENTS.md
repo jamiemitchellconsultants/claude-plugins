@@ -61,11 +61,20 @@ from superpowers create implementation plans in docs/detailed-implementations de
 
   One commit per task — never batch multiple tasks into one commit, and never end a task without
   this step.
-- Each detailed-implementation file opens with a one-line title (`# NN — <area> (Tasks X–Y)`), a
+- Split the detailed plan by increment, not by layer. An increment is a vertical slice: a set of
+  behaviour ids delivered end to end through every layer they need, leaving the system buildable,
+  tested and deployable. `00-overview.md` carries the increment table (increment → behaviour ids →
+  task range), and each further file covers exactly one increment, in build order, so execution
+  can stop at the end of any file. The first increment is a walking skeleton (authentication, the
+  CI/CD pipeline and the infrastructure baseline). A feature with a single behaviour, or fewer than
+  about eight tasks, is one increment.
+- Each increment file opens with a one-line title (`# NN — <increment name> (Tasks X–Y)`), a
   `[← Overview](00-overview.md) · [Ontology](../../ontology.md)` link line, and a short paragraph
-  giving the task range's scope and its position in the layering (domain / application /
-  infrastructure / API / web) — mirror the existing files' framing rather than inventing new
+  giving the behaviour ids the increment delivers, the increments it depends on, and what is
+  deployable when it is done — mirror the existing files' framing rather than inventing new
   section furniture.
+- Execute one increment per session ("pencils down"): when an increment's last task is committed
+  and CI is green, post a handoff naming the next increment and stop.
 - Domain terminology must still follow the [Ontology protocol](#ontology-protocol) below — detailed
   plans are exactly the kind of plan doc that protocol covers.
 

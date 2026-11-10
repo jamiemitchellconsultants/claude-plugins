@@ -15,6 +15,21 @@ test("dev has superpowers fallback", () => {
   assert.ok(readSkill("feature-dev").includes("If superpowers is not installed"));
 });
 
+test("dev slices the feature into increments before writing tasks", () => {
+  const work = section(readSkill("feature-dev"), "## Work");
+  for (const needle of ["increments", "traceability table", "walking skeleton", "exactly one increment", "fewer than about eight tasks"]) {
+    assert.ok(work.includes(needle), needle);
+  }
+  assert.ok(work.indexOf("Break the feature into increments") < work.indexOf("writing-plans"));
+});
+
+test("dev stops at every increment boundary", () => {
+  const work = section(readSkill("feature-dev"), "## Work");
+  assert.match(work, /Pencils down at every increment boundary/);
+  assert.match(work, /one increment per session/i);
+  assert.match(section(readSkill("feature-dev"), "## Checkpoint"), /after each increment/);
+});
+
 test("dev stops after the plan", () => {
   const work = section(readSkill("feature-dev"), "## Work");
   assert.match(work, /plan pull request/);
