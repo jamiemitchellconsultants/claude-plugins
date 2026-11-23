@@ -30,6 +30,16 @@ Every behaviour has an id (B1, B2 and so on) and a Given/When/Then scenario, gro
 
 The checklist on the [Analyst] Behaviours sub-issue, or the Analyst section of the parent issue in lite mode. Tick each criterion as it is met, as persona-common describes.
 
+## Behaviour ids
+
+Later phases, tests, commits and the source knowledge graph refer to behaviours by id, so an id is permanent once it has been published in a phase pull request (or, in lite mode, committed to the design branch).
+
+- Ids are never renumbered and never reused. Regrouping or reordering behaviours keeps every id as it is, so ids need not be in order within a group.
+- A new behaviour takes the next number after the highest id ever used in this feature, counting retired ids.
+- A behaviour whose wording or scenario is refined, but whose meaning is unchanged, keeps its id. A behaviour whose meaning changes is retired, and the new meaning gets a new id.
+- A behaviour that is dropped or replaced is moved to a Retired behaviours section, with its id, the reason, and the id that replaces it, if any. It is never deleted.
+- Outside this feature's own documents, refer to a behaviour as `<slug>#B<n>`, because every feature has its own B1.
+
 ## Gate check
 
 Run `node scripts/feature.mjs gate --feature <n> --phase analyst` and act on the result as persona-common describes.
@@ -41,9 +51,10 @@ Run `node scripts/feature.mjs gate --feature <n> --phase analyst` and act on the
 3. Generate `02-behaviours.md` with these sections:
    - Behaviours, grouped by outcome, each with its id and its Given/When/Then scenario;
    - Uncertainties, each with its decision or deferral;
-   - Terms, listing the domain terms this feature introduces.
+   - Terms, listing the domain terms this feature introduces;
+   - Retired behaviours, once any id has been retired, as Behaviour ids describes.
 
-   Every outcome needs at least one behaviour.
+   Every outcome needs at least one behaviour. Assign and keep ids as Behaviour ids describes.
 4. Update the ontology, following the ontology protocol in the repo's AGENTS.md: add each new domain term to the ontology source, regenerate it, and include both in the phase commit. Use the ontology's exact names in the behaviours.
 5. Show the behaviours, take the user's steering, and regenerate them until they accept them. Tick the exit criteria as they are met.
 
@@ -57,4 +68,4 @@ Apply review comments by regenerating the behaviours, as persona-common describe
 
 ## Pushback
 
-If the vision is contradictory or is missing an outcome, raise pushback to po rather than deciding it here. When this phase is reopened, answer the pushback in amendment mode. Both steps are in persona-common.
+If the vision is contradictory or is missing an outcome, raise pushback to po rather than deciding it here. When this phase is reopened, answer the pushback in amendment mode. Both steps are in persona-common. In amendment mode, keep every existing id as Behaviour ids describes, and list in the handoff the ids added, changed and retired, so later phases know which components, tests and graph entries to revisit.
