@@ -25,6 +25,20 @@ The codebase is .NET.
 - Do not delete remote branches unless explicitly requested.
 - Inspect the staged diff before committing and before pushing.
 
+## Code comments
+
+- Document every public type and member in the language's standard doc-comment format, so the
+  documentation sits next to the code and tools can read it: Javadoc for Java, KDoc for Kotlin,
+  TSDoc or JSDoc for TypeScript and JavaScript, docstrings (PEP 257) for Python, doc comments for
+  Go, rustdoc for Rust.
+<!-- if:dotnet -->
+- In C#, use XML doc comments (`///`): a `<summary>` on every public type and member, plus
+  `<param>`, `<returns>` and `<exception>` wherever they apply.
+<!-- endif -->
+- A doc comment says what the member does, what each parameter means, what it returns, and which
+  errors or exceptions it raises. It does not restate the code.
+- Write new and changed code with its doc comments in place. Do not leave them for a later pass.
+
 <!-- if:dotnet -->
 ## Build and test workflow
 
@@ -61,9 +75,10 @@ from superpowers create implementation plans in docs/detailed-implementations de
   1. `**Files:**` — every file the task creates or touches, marked `Create:`, `Modify:`, or
      `Test:`, with full repo-relative paths.
   2. `**Interfaces:**` — what the task consumes from earlier tasks and what it produces (namespace
-     plus public surface), as a code fragment in the project's language (C# for .NET) with
-     member-level comments rather than prose. This is the "domain entity detail" a downstream task,
-     and a smaller model, reads instead of re-deriving it from the spec.
+     plus public surface), as a code fragment in the project's language (C# for .NET) in which
+     every member carries its doc comment, in the format [Code comments](#code-comments) sets out,
+     rather than prose. This is the "domain entity detail" a downstream task, and a smaller model,
+     reads instead of re-deriving it from the spec, and the implementation keeps those comments.
   3. `- [ ] **Step 1: Write the failing test**` — a complete test file, not a sketch, using the
      project's real test framework and fixtures.
   4. Further numbered `- [ ]` steps implementing the production code to make that test pass, plus
