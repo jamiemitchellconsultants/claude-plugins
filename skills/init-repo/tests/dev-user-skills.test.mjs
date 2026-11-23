@@ -15,6 +15,12 @@ test("dev has superpowers fallback", () => {
   assert.ok(readSkill("feature-dev").includes("If superpowers is not installed"));
 });
 
+test("dev keeps the plan in docs/superpowers even without superpowers", () => {
+  const work = section(readSkill("feature-dev"), "## Work");
+  const fallback = work.slice(work.indexOf("If superpowers is not installed"));
+  assert.match(fallback, /^If superpowers is not installed, still write the plan in `docs\/superpowers\/plans\/<slug>\/plan\.md`/);
+});
+
 test("dev slices the feature into increments before writing tasks", () => {
   const work = section(readSkill("feature-dev"), "## Work");
   for (const needle of ["increments", "traceability table", "walking skeleton", "exactly one increment", "fewer than about eight tasks"]) {
