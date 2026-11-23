@@ -15,6 +15,16 @@ test("analyst asks one question at a time and updates ontology", () => {
   assert.match(text, /ontology/);
 });
 
+test("analyst keeps behaviour ids stable", () => {
+  const text = readSkill("feature-analyst");
+  const ids = section(text, "## Behaviour ids");
+  for (const needle of ["never renumbered", "never reused", "highest id ever used", "Retired behaviours", "`<slug>#B<n>`"]) {
+    assert.ok(ids.includes(needle), needle);
+  }
+  assert.match(section(text, "## Work"), /Retired behaviours/);
+  assert.match(section(text, "## Pushback"), /added, changed and retired/);
+});
+
 test("architect writes ADRs", () => {
   const text = readSkill("feature-architect");
   assert.ok(text.includes("03-architecture.md"));
