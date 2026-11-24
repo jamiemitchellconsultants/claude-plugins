@@ -45,3 +45,26 @@ test("exit criteria are unchanged", () => {
     for (const { text } of items) assert.doesNotMatch(text, /quality|priority|\bQ\d|\[P\]/i, `${phase}: ${text}`);
   }
 });
+
+test("architect traces quality attributes", () => {
+  assert.match(section(readSkill("feature-architect"), "## Work"), /every behaviour id and quality attribute id/);
+});
+
+test("dev orders increments by priority", () => {
+  const work = section(readSkill("feature-dev"), "## Work");
+  assert.match(work, /by the behaviours' priority \(P1, then P2, then P3\)/);
+  assert.match(work, /say why in the increment table/);
+});
+
+test("dev keeps quality attributes out of the one-increment rule", () => {
+  const work = section(readSkill("feature-dev"), "## Work");
+  assert.match(work, /Quality attribute ids are not placed in increments/);
+  assert.ok(work.includes("exactly one increment"));
+});
+
+test("dev defines the parallel marker as order only", () => {
+  const work = section(readSkill("feature-dev"), "## Work");
+  for (const needle of ["`### Task N: <name> [P]`", "only says that order does not matter", "one at a time, each with its own commit and push", "Leaving a task unmarked is always correct"]) {
+    assert.ok(work.includes(needle), needle);
+  }
+});
