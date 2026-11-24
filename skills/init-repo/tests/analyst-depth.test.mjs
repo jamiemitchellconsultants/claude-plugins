@@ -68,3 +68,13 @@ test("dev defines the parallel marker as order only", () => {
     assert.ok(work.includes(needle), needle);
   }
 });
+
+test("user proves every quality attribute", () => {
+  const text = readSkill("feature-user");
+  assert.match(section(text, "### Good output"), /Every quality attribute has an acceptance check/);
+  const work = section(text, "## Work");
+  for (const needle of ["For each quality attribute id", "a scripted inspection with its expected result", "for each behaviour and quality attribute in each environment"]) {
+    assert.ok(work.includes(needle), needle);
+  }
+  assert.ok(work.indexOf("For each quality attribute id") < work.indexOf("Run both layers"));
+});
