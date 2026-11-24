@@ -102,5 +102,5 @@ test("linkedPullRequests looks up each closing reference's state, since gh omits
 
 test("viewPr flattens files and labels", () => {
   const { gh } = scripted([["pr view 5", { body: "Closes #1", files: [{ path: "a.md" }], labels: [{ name: "x" }], headRefName: "feature/demo/build" }]]);
-  assert.deepEqual(gh.viewPr(5), { body: "Closes #1", files: ["a.md"], labels: ["x"], head: "feature/demo/build" });
+  assert.deepEqual(gh.viewPr(5), { body: "Closes #1", files: ["a.md"], deleted: [], labels: ["x"], head: "feature/demo/build", headSha: "" });
 });
