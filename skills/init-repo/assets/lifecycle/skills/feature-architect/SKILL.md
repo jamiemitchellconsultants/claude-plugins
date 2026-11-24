@@ -51,7 +51,7 @@ Run `node scripts/feature.mjs gate --feature <n> --phase architect` and act on t
 
 ## Checkpoint
 
-Open the phase pull request as persona-common describes. In lite mode, the architect opens the design pull request for the product owner, analyst and architect sections together. Post the handoff to the developer. Then stop, and suggest that the user takes a break before planning starts. The next skill is feature-dev.
+Open the phase pull request as persona-common describes. In lite mode, the architect opens the design pull request for the product owner, analyst and architect sections together. Post the handoff to the developer. Then stop, and suggest that the user takes a break before planning starts. Suggest a run of feature-analyze first, to check the vision, behaviours and architecture against each other. It only reports, so whether to run it is the user's call. The next skill is feature-dev.
 
 ## Review feedback
 

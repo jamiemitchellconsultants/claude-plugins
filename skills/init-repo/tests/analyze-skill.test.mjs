@@ -64,3 +64,13 @@ test("the kit docs list the analyze skill", () => {
     assert.ok(readFileSync(join(ROOT, file), "utf8").includes("`feature-analyze`"), file);
   }
 });
+
+test("architect checkpoint suggests analyze", () => {
+  const checkpoint = section(readSkill("feature-architect"), "## Checkpoint");
+  assert.match(checkpoint, /feature-analyze/);
+  assert.ok(checkpoint.indexOf("feature-analyze") < checkpoint.indexOf("The next skill is feature-dev"));
+});
+
+test("resume mentions analyze", () => {
+  assert.match(section(readSkill("feature"), "## Where am I, and resuming after a break"), /feature-analyze/);
+});
