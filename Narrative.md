@@ -12,6 +12,8 @@ This document records what was asked, what was decided, why, and what followed.
 | [2](#entry-docs-add-mit-license-and-describe-the-skills-in-the-readme) | 2026-10-29 | docs: add MIT license and describe the skills in the README | product | License the repository under MIT and make it public. The README now lists every skill with its purpose. |
 | [3](#entry-feat-lifecycle-slice-dev-plans-into-increments-with-a-stop-at-each-bound) | 2026-11-10 | feat(lifecycle): slice dev plans into increments with a stop at each boundary | product | Slice every feature by behaviour into increments that can each be deployed on their own, and run the build one increment per session with a stop at each boundary ("pencils down"). |
 | [4](#entry-doc-comments-stable-behaviour-ids-and-the-dev-plan-folder-in-the-init-re) | 2026-11-23 | Doc comments, stable behaviour ids and the dev plan folder in the init-repo baseline | product | Require doc comments on every public type and member in the language's standard doc-comment format, with XML doc comments for C#, and make detailed-plan interfaces use that format. |
+| [5](#entry-feat-lifecycle-require-frontmatter-on-feature-artefacts-and-adrs) | 2026-11-24 | feat(lifecycle): require frontmatter on feature artefacts and ADRs | product | Require frontmatter that holds only facts that never change on feature artefacts, and frontmatter with status on ADRs, the one status no issue tracks. Enforce both in `feature-gate` and in a local `check-frontmatter` command. |
+| [6](#entry-feat-lifecycle-spec-kit-ideas-as-guidance-feature-analyze-quality-attrib) | 2026-11-24 | feat(lifecycle): Spec Kit ideas as guidance: feature-analyze, quality attributes, priority | product | Adopt the ideas as guidance, with no enforcement. - The consistency review is an advisory skill (`feature-analyze`), run when wanted and suggested once at the architect checkpoint. |
 
 ---
 
@@ -124,3 +126,81 @@ Generated repositories document public code consistently, and detailed plans sho
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 
 AI-Fingerprint: sha256:ce70f1267d01
+
+---
+
+<a id="entry-feat-lifecycle-require-frontmatter-on-feature-artefacts-and-adrs"></a>
+
+## Entry 5 — 2026-11-24 — feat(lifecycle): require frontmatter on feature artefacts and ADRs
+
+*Kind: product. Status: accepted.*
+
+## Context
+
+The persona skills generate a lot of Markdown, but nothing machine-readable ties a document to its feature, phase or inputs. ADR status lived in a bullet list that nothing checked. Adding frontmatter without anything that reads it would only create fields that decay. Putting phase progress in frontmatter would duplicate the issue state, which AGENTS.md treats as worse than no copy.
+
+## Decision
+
+Require frontmatter that holds only facts that never change on feature artefacts, and frontmatter with status on ADRs, the one status no issue tracks. Enforce both in `feature-gate` and in a local `check-frontmatter` command. Superpowers plans and detailed implementation plans are deliberately left without frontmatter: superpowers controls its own output, and the detailed-plan header format is already prescribed.
+
+Rejected alternatives: a blanket "add frontmatter" instruction with no check, and progress fields (status, completion) in feature artefacts.
+
+## Consequences
+
+Artefacts can be traced to their feature and inputs by tooling, and an ADR's supersession is explicit. Existing features need their frontmatter added on the next PR that touches them. Whether a source actually exists, and whether its content matches, is deliberately not checked.
+
+---
+
+AI-Fingerprint: sha256:58533b5e586e
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+---
+
+<a id="entry-feat-lifecycle-spec-kit-ideas-as-guidance-feature-analyze-quality-attrib"></a>
+
+## Entry 6 — 2026-11-24 — feat(lifecycle): Spec Kit ideas as guidance: feature-analyze, quality attributes, priority
+
+*Kind: product. Status: accepted.*
+
+## Context
+
+The exit criteria are ticked by the agent doing the work, and nothing checks the artefacts against each other, so drift between the vision, behaviours, architecture, plan and acceptance goes unnoticed until it becomes code. Several things were also left to the agent:
+- the analyst's uncertainty list depended on what it happened to notice;
+- non-functional requirements had no owner;
+- increment order was decided at planning;
+- nothing marked tasks whose order doesn't matter.
+
+Spec Kit covers each of these. The owner's tooling principles rule out the usual way of enforcing them: low friction (nothing new may block) and readable documents (no fixed layouts for a checker).
+
+## Decision
+
+Adopt the ideas as guidance, with no enforcement.
+
+- The consistency review is an advisory skill (`feature-analyze`), run when wanted and suggested once at the architect checkpoint.
+- The analyst owns quality attributes and the user's acceptance proves them. Priority lives in the document body, because PR 12's frontmatter check rejects unknown keys.
+- The `[P]` marker lives in feature-dev rather than the `AGENTS.md` task format, because `init-repo` overwrites the kit on every run but never rewrites an existing `AGENTS.md`.
+
+Rejected alternatives:
+- a `feature.mjs analyze` script or a CI step, because it would force fixed formats and could block;
+- a review step at every checkpoint, which adds friction even when there's nothing to find;
+- giving quality attributes to the product owner (too coarse) or the architect (the builder would decide what's required);
+- putting `[P]` in both `AGENTS.md` and the skill, which leaves two copies of one rule.
+
+## Consequences
+
+- Drift and gaps can be found on demand, but nothing guarantees anyone looks.
+- Quality attributes are traced and accepted like behaviours, without entering any gate.
+- Increment order now follows the spec's priorities.
+- Existing target repos get all of this on their next `init-repo` run, because the kit is overwritten.
+
+Deliberately left open:
+- whether P3 behaviours may be dropped (today priority only sets the order);
+- whether every quality attribute can be checked in a local build;
+- the deferred wording minors listed above.
+
+---
+
+AI-Fingerprint: sha256:a7345219c9de
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

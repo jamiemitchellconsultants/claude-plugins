@@ -44,14 +44,14 @@ Run `node scripts/feature.mjs gate --feature <n> --phase architect` and act on t
    - Components, each with its responsibility and the behaviour ids it serves;
    - Structure, which covers how the components connect (add a Mermaid diagram if it helps);
    - Deployment and runtime;
-   - Traceability, a table from every behaviour id to its components (no row may be empty);
+   - Traceability, a table from every behaviour id and quality attribute id to the components or mechanisms that serve it (no row may be empty);
    - Decisions, which links to the ADRs.
-4. For each significant decision, write `docs/adr/NNNN-<title>.md` from `../feature/templates/adr.md`, numbering it after the highest existing file in `docs/adr/` (0001 if there are none). Link each ADR from `03-architecture.md` and from the pull request's Narrative sections.
+4. For each significant decision, write `docs/adr/NNNN-<title>.md` from `../feature/templates/adr.md`, numbering it after the highest existing file in `docs/adr/` (0001 if there are none). Link each ADR from `03-architecture.md` and from the pull request's Narrative sections. Fill in its frontmatter: `status` (proposed, accepted, superseded or deprecated), `date`, and `feature`, the parent issue number. When a new ADR replaces an earlier one, list the earlier number in the new ADR's `supersedes`, and set the earlier ADR's `status` to superseded and its `superseded-by` to the new number.
 5. Show the architecture, take the user's steering, and regenerate it until they accept it. Tick the exit criteria as they are met.
 
 ## Checkpoint
 
-Open the phase pull request as persona-common describes. In lite mode, the architect opens the design pull request for the product owner, analyst and architect sections together. Post the handoff to the developer. Then stop, and suggest that the user takes a break before planning starts. The next skill is feature-dev.
+Open the phase pull request as persona-common describes. In lite mode, the architect opens the design pull request for the product owner, analyst and architect sections together. Post the handoff to the developer. Then stop, and suggest that the user takes a break before planning starts. Suggest a run of feature-analyze first, to check the vision, behaviours and architecture against each other. It only reports, so whether to run it is the user's call. The next skill is feature-dev.
 
 ## Review feedback
 

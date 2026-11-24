@@ -37,7 +37,7 @@ See [`skills/init-repo/SKILL.md`](skills/init-repo/SKILL.md) for the full proced
 
 ### Feature lifecycle skills (installed into your repo by `init-repo`)
 
-Seven portable skills, copied into `.claude/skills/`, `.agents/skills/` and `.kiro/skills/` so
+Eight portable skills, copied into `.claude/skills/`, `.agents/skills/` and `.kiro/skills/` so
 Claude Code, Codex, opencode and Kiro all find them. Each phase hands off through a GitHub issue,
 and the `feature-gate` check stops a phase starting before the one before it is accepted.
 
@@ -50,6 +50,7 @@ and the `feature-gate` check stops a phase starting before the one before it is 
 | `feature-dev` | Act as developer: write implementation plans from the accepted vision, behaviours and architecture, then build from the approved plan. |
 | `feature-user` | Act as user: write the runbook and user guide, and run acceptance with scripted walkthroughs and executable tests locally and in the deployed environment. |
 | `feature-park` | Record something outside the current phase (a bug, an idea, a refactor) as a side issue instead of working on it now. |
+| `feature-analyze` | Check a feature's artefacts against each other and report gaps, behaviour id mistakes, terminology drift, vague wording and contradictions. It changes nothing and blocks nothing. |
 
 Every persona skill also handles review feedback and pushback for its own phase. See the
 [design](docs/superpowers/specs/2026-10-29-feature-lifecycle-design.md).

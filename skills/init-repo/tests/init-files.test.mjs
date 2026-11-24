@@ -14,6 +14,7 @@ const KIT_FILES = [
   ".claude/skills/feature-analyst/SKILL.md",
   ".agents/skills/feature-analyst/SKILL.md",
   ".kiro/skills/feature-analyst/SKILL.md",
+  ".claude/skills/feature-analyze/SKILL.md",
   ".claude/skills/feature/templates/handoff.md",
   "scripts/feature.mjs",
   "scripts/feature-lib.mjs",

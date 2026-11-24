@@ -210,6 +210,7 @@
     rdfs:comment "The rule that a `Phase` may start only when every earlier phase is done, fully ticked and free of `Pushback`. Evaluated by `feature.mjs gate` in the skills and by the required `feature-gate` check on pull requests." ;
     kit:invariant "can be bypassed only by the `gate-override` label on a pull request, with the reason in its Narrative sections; the admin merge override does not open a gate." ;
     kit:invariant "an error reading GitHub never counts as an open gate." ;
+    kit:invariant "the `feature-gate` check also fails a phase pull request when a `FeatureArtefact` or `ArchitectureDecisionRecord` it adds or changes has missing or wrong frontmatter; `feature.mjs check-frontmatter` runs the same rules locally." ;
     kit:definedIn "[design](superpowers/specs/2026-10-29-feature-lifecycle-design.md)" .
 
 :SideIssue a owl:Class ;
@@ -223,18 +224,53 @@
     rdfs:label "FeatureArtefact" ;
     rdfs:comment "A generated document in `docs/features/<slug>/`: `01-vision.md`, `02-behaviours.md`, `03-architecture.md`, `05-runbook.md`, `05-user-guide.md`, `05-acceptance.md` in full mode, or the single `feature.md` in lite mode." ;
     kit:invariant "is generated from prompts and never changed by hand." ;
+    kit:invariant "starts with a frontmatter block holding only facts that never change: `feature` (the parent issue number), `slug`, `phase` (the `Phase` that owns the file) and `sources` (the earlier artefacts it was generated from; none for `01-vision.md`). The lite `feature.md` holds only `feature` and `slug`. Progress is never recorded here; it stays on the issues." ;
     kit:definedIn "[design](superpowers/specs/2026-10-29-feature-lifecycle-design.md)" .
+
+:Behaviour a owl:Class ;
+    rdfs:subClassOf kit:Entity ;
+    rdfs:label "Behaviour" ;
+    rdfs:comment "An observable system behaviour in `02-behaviours.md`, written by the analyst as a Given/When/Then scenario with a permanent B id and a `BehaviourPriority`." ;
+    kit:invariant "its id is never renumbered or reused; a change of meaning retires it and takes a new id, while a change of priority keeps it." ;
+    kit:definedIn "[design](superpowers/specs/2026-11-24-analyst-depth-design.md)" .
+
+:QualityAttribute a owl:Class ;
+    rdfs:subClassOf kit:Entity ;
+    rdfs:label "QualityAttribute" ;
+    rdfs:comment "A measurable quality the system must meet, such as performance, security or accessibility, in `02-behaviours.md` with a permanent Q id. The analyst writes it, the architect traces it to components, and acceptance proves it." ;
+    kit:invariant "follows the same id rules as a `Behaviour`, and is never placed in an increment." ;
+    kit:definedIn "[design](superpowers/specs/2026-11-24-analyst-depth-design.md)" .
+
+:BehaviourPriority a owl:Class ;
+    rdfs:subClassOf kit:Enum ;
+    rdfs:label "BehaviourPriority" ;
+    rdfs:comment "How soon a `Behaviour` is needed. Increments are ordered by it after the walking skeleton." .
+
+:BehaviourPriority_P1 a :BehaviourPriority ;
+    rdfs:label "P1" ;
+    rdfs:comment "Needed for the first usable release." .
+
+:BehaviourPriority_P2 a :BehaviourPriority ;
+    rdfs:label "P2" ;
+    rdfs:comment "Wanted soon after." .
+
+:BehaviourPriority_P3 a :BehaviourPriority ;
+    rdfs:label "P3" ;
+    rdfs:comment "Would be nice." .
 
 :ArchitectureDecisionRecord a owl:Class ;
     rdfs:subClassOf kit:Entity ;
     rdfs:label "ArchitectureDecisionRecord" ;
     rdfs:comment "An ADR written by the architect for each significant decision, at `docs/adr/NNNN-<title>.md` numbered across the whole repository, linked from `03-architecture.md` and from the PR's Narrative sections." ;
+    kit:hasProperty "status" ;
+    kit:invariant "starts with a frontmatter block holding `status` (an `AdrStatus`), `date` (YYYY-MM-DD) and `feature` (the parent issue number), plus `supersedes` and `superseded-by` where one ADR replaces another." ;
+    kit:invariant "has `superseded-by` exactly when its status is superseded." ;
     kit:definedIn "[design](superpowers/specs/2026-10-29-feature-lifecycle-design.md)" .
 
 :LifecycleKit a owl:Class ;
     rdfs:subClassOf kit:Entity ;
     rdfs:label "LifecycleKit" ;
-    rdfs:comment "The files `init-repo` owns and copies into a `TargetRepository`: every `PersonaSkill` plus the `feature` and `feature-park` skills (into `.claude/skills/`, `.agents/skills/` and `.kiro/skills/`), `scripts/feature*.mjs`, and `.github/workflows/feature-gate.yml`." ;
+    rdfs:comment "The files `init-repo` owns and copies into a `TargetRepository`: every `PersonaSkill` plus the `feature`, `feature-park` and `feature-analyze` skills (into `.claude/skills/`, `.agents/skills/` and `.kiro/skills/`), `scripts/feature*.mjs`, and `.github/workflows/feature-gate.yml`." ;
     kit:invariant "is overwritten on every run of `init-files.mjs` (reported `updated`), unlike the rest of the `Baseline`; changes belong in this marketplace's assets." ;
     kit:definedIn "[design](superpowers/specs/2026-10-29-feature-lifecycle-design.md)" .
 
@@ -248,6 +284,23 @@
 
 :FeatureMode_lite a :FeatureMode ;
     rdfs:label "lite" .
+
+:AdrStatus a owl:Class ;
+    rdfs:subClassOf kit:Enum ;
+    rdfs:label "AdrStatus" ;
+    rdfs:comment "The `status` in an `ArchitectureDecisionRecord`'s frontmatter. It is the one lifecycle status kept in a file, because no issue tracks an ADR." .
+
+:AdrStatus_proposed a :AdrStatus ;
+    rdfs:label "proposed" .
+
+:AdrStatus_accepted a :AdrStatus ;
+    rdfs:label "accepted" .
+
+:AdrStatus_superseded a :AdrStatus ;
+    rdfs:label "superseded" .
+
+:AdrStatus_deprecated a :AdrStatus ;
+    rdfs:label "deprecated" .
 
 :Persona a owl:Class ;
     rdfs:subClassOf kit:Enum ;

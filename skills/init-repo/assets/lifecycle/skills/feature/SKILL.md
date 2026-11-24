@@ -38,6 +38,7 @@ All GitHub work goes through `node scripts/feature.mjs`. It exits 0 when all is 
 2. Run `node scripts/feature.mjs status --feature <n>`.
 3. Read the latest handoff comment on the parent issue with `gh issue view <n> --comments`. Summarise it in three lines: what was decided, what was passed on, and what the next role should challenge.
 4. Name the next skill. If the gate is closed, show the reasons and say what would meet each one.
+5. If the next skill is feature-dev or a later one, mention that feature-analyze can check the artefacts so far against each other. It only reports, so it is optional.
 
 ## Recording pushback
 
@@ -51,6 +52,6 @@ Use this when someone finds that an earlier phase's artefact is wrong or incompl
 ## Promoting a lite feature to full mode
 
 1. Run `node scripts/feature.mjs promote --feature <n>`. It creates the sub-issues, closes the ones whose sections are done, and lists the numbered files.
-2. On a branch named `feature/<slug>/promote`, generate each numbered file from its section of `feature.md` and remove `feature.md`.
+2. On a branch named `feature/<slug>/promote`, generate each numbered file from its section of `feature.md`, with the frontmatter that `templates/persona-common.md` describes, and remove `feature.md`. Run `node scripts/feature.mjs check-frontmatter --feature <n>` before committing.
 3. Open a pull request that explains the promotion, following the repo's AGENTS.md for the commit and the pull-request body.
 4. Stop at the checkpoint and name the next skill.

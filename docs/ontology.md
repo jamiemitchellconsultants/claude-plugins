@@ -47,8 +47,10 @@ error.
 | `Gate` |  | The rule that a `Phase` may start only when every earlier phase is done, fully ticked and free of `Pushback`. Evaluated by `feature.mjs gate` in the skills and by the required `feature-gate` check on pull requests. |
 | `SideIssue` |  | A `GitHub` issue labelled `side-issue` that records something noticed during a `Feature` without working on it. Its body starts `Side issue of #<n>, noticed during <phase title>.`; it is never a sub-issue, so it does not affect the current `Phase`. |
 | `FeatureArtefact` |  | A generated document in `docs/features/<slug>/`: `01-vision.md`, `02-behaviours.md`, `03-architecture.md`, `05-runbook.md`, `05-user-guide.md`, `05-acceptance.md` in full mode, or the single `feature.md` in lite mode. |
-| `ArchitectureDecisionRecord` |  | An ADR written by the architect for each significant decision, at `docs/adr/NNNN-<title>.md` numbered across the whole repository, linked from `03-architecture.md` and from the PR's Narrative sections. |
-| `LifecycleKit` |  | The files `init-repo` owns and copies into a `TargetRepository`: every `PersonaSkill` plus the `feature` and `feature-park` skills (into `.claude/skills/`, `.agents/skills/` and `.kiro/skills/`), `scripts/feature*.mjs`, and `.github/workflows/feature-gate.yml`. |
+| `Behaviour` |  | An observable system behaviour in `02-behaviours.md`, written by the analyst as a Given/When/Then scenario with a permanent B id and a `BehaviourPriority`. |
+| `QualityAttribute` |  | A measurable quality the system must meet, such as performance, security or accessibility, in `02-behaviours.md` with a permanent Q id. The analyst writes it, the architect traces it to components, and acceptance proves it. |
+| `ArchitectureDecisionRecord` | `status` | An ADR written by the architect for each significant decision, at `docs/adr/NNNN-<title>.md` numbered across the whole repository, linked from `03-architecture.md` and from the PR's Narrative sections. |
+| `LifecycleKit` |  | The files `init-repo` owns and copies into a `TargetRepository`: every `PersonaSkill` plus the `feature`, `feature-park` and `feature-analyze` skills (into `.claude/skills/`, `.agents/skills/` and `.kiro/skills/`), `scripts/feature*.mjs`, and `.github/workflows/feature-gate.yml`. |
 
 ---
 
@@ -59,7 +61,9 @@ error.
 | `Stack` | `dotnet`, `none` | The `TargetRepository`'s technology stack, passed as `--stack`. Decides whether the .NET build workflow and the `no-build-check` label are part of the `Baseline`. |
 | `FileOutcome` | `created`, `kept`, `updated` | What `init-files.mjs` reports for each `Baseline` file it considers. |
 | `RepositoryLabel` | `narrative-required`, `no-build-check`, `feature`, `side-issue`, `pushback`, `gate-override`, `phase:po`, `phase:analyst`, `phase:architect`, `phase:dev`, `phase:user` | The `GitHub` pull-request labels `apply-github-settings.sh` creates. |
+| `BehaviourPriority` | `P1`, `P2`, `P3` | How soon a `Behaviour` is needed. Increments are ordered by it after the walking skeleton. |
 | `FeatureMode` | `full`, `lite` | How much GitHub ceremony a `Feature` carries: full (a sub-issue and PR per `Phase`) or lite (one issue, one `feature.md`, three PRs). |
+| `AdrStatus` | `proposed`, `accepted`, `superseded`, `deprecated` | The `status` in an `ArchitectureDecisionRecord`'s frontmatter. It is the one lifecycle status kept in a file, because no issue tracks an ADR. |
 | `Persona` | `po`, `analyst`, `architect`, `dev`, `user` | The role that owns a `Phase`. Each has its own `PersonaSkill`. |
 | `PhaseId` | `po`, `analyst`, `architect`, `dev-plan`, `dev-build`, `user` | The id of a `Phase`, in order. The dev `Persona` owns two phases, so the plan is reviewed before any code is written. |
 
@@ -106,5 +110,11 @@ error.
 - **`PersonaSkill`** — never starts the next `Phase` itself: every `Handoff` is a checkpoint that stops and suggests a break.
 - **`Gate`** — can be bypassed only by the `gate-override` label on a pull request, with the reason in its Narrative sections; the admin merge override does not open a gate.
 - **`Gate`** — an error reading GitHub never counts as an open gate.
+- **`Gate`** — the `feature-gate` check also fails a phase pull request when a `FeatureArtefact` or `ArchitectureDecisionRecord` it adds or changes has missing or wrong frontmatter; `feature.mjs check-frontmatter` runs the same rules locally.
 - **`FeatureArtefact`** — is generated from prompts and never changed by hand.
+- **`FeatureArtefact`** — starts with a frontmatter block holding only facts that never change: `feature` (the parent issue number), `slug`, `phase` (the `Phase` that owns the file) and `sources` (the earlier artefacts it was generated from; none for `01-vision.md`). The lite `feature.md` holds only `feature` and `slug`. Progress is never recorded here; it stays on the issues.
+- **`Behaviour`** — its id is never renumbered or reused; a change of meaning retires it and takes a new id, while a change of priority keeps it.
+- **`QualityAttribute`** — follows the same id rules as a `Behaviour`, and is never placed in an increment.
+- **`ArchitectureDecisionRecord`** — starts with a frontmatter block holding `status` (an `AdrStatus`), `date` (YYYY-MM-DD) and `feature` (the parent issue number), plus `supersedes` and `superseded-by` where one ADR replaces another.
+- **`ArchitectureDecisionRecord`** — has `superseded-by` exactly when its status is superseded.
 - **`LifecycleKit`** — is overwritten on every run of `init-files.mjs` (reported `updated`), unlike the rest of the `Baseline`; changes belong in this marketplace's assets.
