@@ -227,6 +227,37 @@
     kit:invariant "starts with a frontmatter block holding only facts that never change: `feature` (the parent issue number), `slug`, `phase` (the `Phase` that owns the file) and `sources` (the earlier artefacts it was generated from; none for `01-vision.md`). The lite `feature.md` holds only `feature` and `slug`. Progress is never recorded here; it stays on the issues." ;
     kit:definedIn "[design](superpowers/specs/2026-10-29-feature-lifecycle-design.md)" .
 
+:Behaviour a owl:Class ;
+    rdfs:subClassOf kit:Entity ;
+    rdfs:label "Behaviour" ;
+    rdfs:comment "An observable system behaviour in `02-behaviours.md`, written by the analyst as a Given/When/Then scenario with a permanent B id and a `BehaviourPriority`." ;
+    kit:invariant "its id is never renumbered or reused; a change of meaning retires it and takes a new id, while a change of priority keeps it." ;
+    kit:definedIn "[design](superpowers/specs/2026-11-24-analyst-depth-design.md)" .
+
+:QualityAttribute a owl:Class ;
+    rdfs:subClassOf kit:Entity ;
+    rdfs:label "QualityAttribute" ;
+    rdfs:comment "A measurable quality the system must meet, such as performance, security or accessibility, in `02-behaviours.md` with a permanent Q id. The analyst writes it, the architect traces it to components, and acceptance proves it." ;
+    kit:invariant "follows the same id rules as a `Behaviour`, and is never placed in an increment." ;
+    kit:definedIn "[design](superpowers/specs/2026-11-24-analyst-depth-design.md)" .
+
+:BehaviourPriority a owl:Class ;
+    rdfs:subClassOf kit:Enum ;
+    rdfs:label "BehaviourPriority" ;
+    rdfs:comment "How soon a `Behaviour` is needed. Increments are ordered by it after the walking skeleton." .
+
+:BehaviourPriority_P1 a :BehaviourPriority ;
+    rdfs:label "P1" ;
+    rdfs:comment "Needed for the first usable release." .
+
+:BehaviourPriority_P2 a :BehaviourPriority ;
+    rdfs:label "P2" ;
+    rdfs:comment "Wanted soon after." .
+
+:BehaviourPriority_P3 a :BehaviourPriority ;
+    rdfs:label "P3" ;
+    rdfs:comment "Would be nice." .
+
 :ArchitectureDecisionRecord a owl:Class ;
     rdfs:subClassOf kit:Entity ;
     rdfs:label "ArchitectureDecisionRecord" ;
