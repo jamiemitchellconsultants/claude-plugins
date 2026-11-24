@@ -19,7 +19,7 @@ test("analyst scans every uncertainty heading", () => {
 
 test("analyst asks at most five, with a recommended answer", () => {
   const work = section(readSkill("feature-analyst"), "## Work");
-  for (const needle of ["the five that would change the behaviours most", "one question at a time", "recommended answer", "the analyst's call"]) {
+  for (const needle of ["at most five, the ones that would change the behaviours most", "one question at a time", "recommended answer", "the analyst's call"]) {
     assert.ok(work.includes(needle), needle);
   }
 });
@@ -84,4 +84,15 @@ test("analyze checks quality attributes and priority", () => {
   for (const needle of ["a quality attribute id with no component or no acceptance check", "the same rules apply to quality attribute ids", "increments ordered against behaviour priority with no reason given"]) {
     assert.ok(steps.includes(needle), needle);
   }
+});
+
+test("user acceptance flow runs and records quality attribute checks", () => {
+  const work = section(readSkill("feature-user"), "## Work");
+  for (const needle of ["an executable check in the repo's test suite", "Follow each scripted inspection", "for a quality attribute, the kind of check, its result, the date and who ran it"]) {
+    assert.ok(work.includes(needle), needle);
+  }
+});
+
+test("analyst never pads the questions to five", () => {
+  assert.match(section(readSkill("feature-analyst"), "## Work"), /at most five, the ones that would change the behaviours most/);
 });

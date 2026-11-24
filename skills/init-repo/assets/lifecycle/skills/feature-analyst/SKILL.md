@@ -57,7 +57,7 @@ Run `node scripts/feature.mjs gate --feature <n> --phase analyst` and act on the
    - integrations and external systems;
    - completion signals, meaning how anyone will know an outcome is met.
 
-   Ask the user about the five that would change the behaviours most, one question at a time, each with a recommended answer they can accept as it stands. Decide the rest yourself, and record each one in the uncertainty log as the analyst's call, so the user can overturn it while reviewing. Any of them may instead be explicitly deferred as out of scope.
+   Ask the user about at most five, the ones that would change the behaviours most, one question at a time, each with a recommended answer they can accept as it stands. Decide the rest yourself, and record each one in the uncertainty log as the analyst's call, so the user can overturn it while reviewing. Any of them may instead be explicitly deferred as out of scope.
 3. Generate `02-behaviours.md` with these sections:
    - Behaviours, grouped by outcome, each with its id, its priority (P1 when it is needed for the first usable release, P2 when it is wanted soon after, P3 when it would be nice) and its Given/When/Then scenario;
    - Quality attributes, each with its id, a measurable statement and the outcome it serves (or all of them);
