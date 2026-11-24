@@ -78,3 +78,10 @@ test("user proves every quality attribute", () => {
   }
   assert.ok(work.indexOf("For each quality attribute id") < work.indexOf("Run both layers"));
 });
+
+test("analyze checks quality attributes and priority", () => {
+  const steps = section(readSkill("feature-analyze"), "## Steps");
+  for (const needle of ["a quality attribute id with no component or no acceptance check", "the same rules apply to quality attribute ids", "increments ordered against behaviour priority with no reason given"]) {
+    assert.ok(steps.includes(needle), needle);
+  }
+});
