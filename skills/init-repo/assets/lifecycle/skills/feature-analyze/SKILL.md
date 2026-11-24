@@ -12,9 +12,9 @@ Read the artefacts as prose. Any reasonable layout is fine, so never ask for hea
 ## Steps
 
 1. Find the feature. If the user has not said which one, run `node scripts/feature.mjs status` and ask. Then run `node scripts/feature.mjs status --feature <n>` for its slug, its mode and its current phase.
-2. Read whatever exists so far:
+2. Read whatever exists so far, on the branch of the feature's open phase pull request if there is one, because its artefacts are not on the default branch until it merges; otherwise on the default branch:
    - in full mode, `01-vision.md`, `02-behaviours.md`, `03-architecture.md` and the ADRs it links, and the `05-` files, all under `docs/features/<slug>/`;
-   - in lite mode, the sections of `docs/features/<slug>/feature.md`;
+   - in lite mode, the sections of `docs/features/<slug>/feature.md` and the ADRs its Architect section links;
    - in either mode, the plans under `docs/superpowers/plans/<slug>/` and `docs/detailed-implementations/<slug>/`, and the repo's ontology.
 
    Review only what exists. A feature in the analyst phase has no architecture yet, so never report a later artefact as missing.

@@ -74,3 +74,12 @@ test("architect checkpoint suggests analyze", () => {
 test("resume mentions analyze", () => {
   assert.match(section(readSkill("feature"), "## Where am I, and resuming after a break"), /feature-analyze/);
 });
+
+test("analyze reads the open phase branch", () => {
+  assert.match(readSkill("feature-analyze"), /branch of the feature's open phase pull request/);
+});
+
+test("analyze reads ADRs in lite mode", () => {
+  const lite = readSkill("feature-analyze").split("\n").find((line) => line.includes("docs/features/<slug>/feature.md"));
+  assert.match(lite, /ADRs/);
+});
