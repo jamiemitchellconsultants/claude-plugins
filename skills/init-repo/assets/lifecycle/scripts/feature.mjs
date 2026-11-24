@@ -4,19 +4,24 @@
 //
 // Usage: node scripts/feature.mjs <subcommand> [--option value ...]
 
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { makeGh } from "./feature-gh.mjs";
 import {
   FULL_ARTEFACTS,
   PHASES,
+  checkAdr,
+  checkFeatureArtefact,
   classifyPr,
   currentPhase,
   evaluateGate,
   getPhase,
+  isAdrPath,
+  isArtefactName,
   nextSkill,
   parseLiteSections,
+  parseFrontmatter,
   parseParent,
   parseSubIssue,
   phaseIndex,
@@ -286,12 +291,14 @@ function gatePr(opts, { gh, out }) {
     if (sub?.parentNumber) addTarget(sub.parentNumber, sub.phaseId);
   }
   const features = slugs.length > 0 ? gh.listFeatures() : [];
+  const featureOfSlug = new Map();
   for (const slug of slugs) {
     const feature = features.find((f) => parseParent(f.body)?.slug === slug);
     if (!feature) {
       out(`no open feature for docs/features/${slug}/: skipped`);
       continue;
     }
+    featureOfSlug.set(slug, feature.number);
     if (!targets.has(feature.number)) addTarget(feature.number, null);
   }
   let code = 0;
@@ -309,7 +316,65 @@ function gatePr(opts, { gh, out }) {
       if (!result.open) code = 2;
     }
   }
-  return code;
+  const reasons = prFrontmatterReasons(pr, featureOfSlug, [...targets.keys()], gh);
+  reportFrontmatter(reasons, out);
+  return reasons.length > 0 ? 2 : code;
+}
+
+const FEATURE_FILE = /^docs\/features\/([^/]+)\/([^/]+)$/;
+
+function prFrontmatterReasons(pr, featureOfSlug, featureNumbers, gh) {
+  const reasons = [];
+  const deleted = new Set(pr.deleted ?? []);
+  for (const path of pr.files.filter((f) => !deleted.has(f))) {
+    const m = path.match(FEATURE_FILE);
+    if (m && featureOfSlug.has(m[1]) && isArtefactName(m[2])) {
+      const feature = { number: featureOfSlug.get(m[1]), slug: m[1] };
+      reasons.push(...checkFeatureArtefact({ path, text: gh.readPrFile(path, pr.headSha), feature }));
+    } else if (isAdrPath(path) && featureNumbers.length > 0) {
+      reasons.push(...checkAdr({ path, text: gh.readPrFile(path, pr.headSha), features: featureNumbers }));
+    }
+  }
+  return reasons;
+}
+
+function reportFrontmatter(reasons, out) {
+  if (reasons.length === 0) {
+    out("frontmatter: ok");
+    return;
+  }
+  out("frontmatter: problems found");
+  for (const reason of reasons) out(`  - ${reason}`);
+}
+
+const ADR_LINK = /adr\/(\d{4}-[^)\s#/]+\.md)/g;
+
+// Local twin of the gate-pr frontmatter check, so a persona can catch problems before pushing.
+// It cannot know which ADRs a branch touched, so it checks those that name this feature or are
+// linked from its artefacts.
+function checkFrontmatter(opts, { gh, out, cwd }) {
+  need(opts, "feature");
+  const n = issueNumber(opts, "feature");
+  const { slug } = gh.loadFeature(n);
+  const reasons = [];
+  const linked = new Set();
+  const dir = join(cwd, "docs", "features", slug);
+  for (const name of existsSync(dir) ? readdirSync(dir).filter(isArtefactName).sort() : []) {
+    const text = readFileSync(join(dir, name), "utf8");
+    for (const m of text.matchAll(ADR_LINK)) linked.add(m[1]);
+    reasons.push(...checkFeatureArtefact({ path: `docs/features/${slug}/${name}`, text, feature: { number: n, slug } }));
+  }
+  const adrDir = join(cwd, "docs", "adr");
+  for (const name of existsSync(adrDir) ? readdirSync(adrDir).sort() : []) {
+    const path = `docs/adr/${name}`;
+    if (!isAdrPath(path)) continue;
+    const text = readFileSync(join(adrDir, name), "utf8");
+    if (linked.has(name) || parseFrontmatter(text)?.fields?.feature === String(n)) {
+      reasons.push(...checkAdr({ path, text, features: [n] }));
+    }
+  }
+  reportFrontmatter(reasons, out);
+  return reasons.length > 0 ? 2 : 0;
 }
 
 const COMMANDS = {
@@ -317,6 +382,7 @@ const COMMANDS = {
   status,
   gate,
   "gate-pr": gatePr,
+  "check-frontmatter": checkFrontmatter,
   pushback,
   park,
   handoff,

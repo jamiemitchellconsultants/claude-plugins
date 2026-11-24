@@ -10,6 +10,8 @@ import { fakeGh, run } from "./helpers/fake-gh.mjs";
 const WORKFLOW = join(dirname(fileURLToPath(import.meta.url)), "../assets/lifecycle/workflows/feature-gate.yml");
 
 const parent = (number, slug) => ({ number, title: `Feature: ${slug}`, body: renderParentBody({ name: slug, slug, mode: "full" }) });
+const frontmatter = (fields) => `---\n${Object.entries(fields).map(([k, v]) => `${k}: ${v}`).join("\n")}\n---\n`;
+const artefact = (number, slug, phase, sources) => frontmatter({ feature: number, slug, phase, ...(sources ? { sources } : {}) });
 const subIssue = (phaseId, parentNumber) => ({ number: 0, title: "", body: renderSubIssueBody({ phaseId, parentNumber }), state: "open", labels: [] });
 
 test("gate-pr passes non-phase PR", () => {
@@ -35,6 +37,7 @@ test("gate-pr passes open gate", () => {
     issues: { 12: subIssue("architect", 1) },
     features: [parent(1, "demo")],
     states: { 1: fullState(["po", "analyst"]) },
+    prFiles: { "docs/features/demo/03-architecture.md": artefact(1, "demo", "architect", "[02-behaviours.md]") },
   });
   const { code, output } = run(["gate-pr", "--pr", "9"], gh);
   assert.equal(code, 0);
@@ -58,6 +61,10 @@ test("gate-pr fails when any feature gate closed", () => {
     pr: { body: "", files: ["docs/features/a/03-architecture.md", "docs/features/b/02-behaviours.md"], labels: [] },
     features: [parent(1, "a"), parent(2, "b")],
     states: { 1: { ...fullState(["po", "analyst"]), slug: "a" }, 2: second },
+    prFiles: {
+      "docs/features/a/03-architecture.md": artefact(1, "a", "architect", "[02-behaviours.md]"),
+      "docs/features/b/02-behaviours.md": artefact(2, "b", "analyst", "[01-vision.md]"),
+    },
   });
   const { code, output } = run(["gate-pr", "--pr", "9"], gh);
   assert.equal(code, 2);
@@ -83,12 +90,14 @@ test("lite gate-pr derives the phase from the head branch", () => {
     pr: { body: "", files: ["docs/features/demo/feature.md"], labels: [], head: "feature/demo/build" },
     features: [{ number: 1, title: "Feature: demo", body: renderParentBody({ name: "demo", slug: "demo", mode: "lite" }) }],
     states: lite(["po"]),
+    prFiles: { "docs/features/demo/feature.md": frontmatter({ feature: 1, slug: "demo" }) },
   });
   assert.equal(run(["gate-pr", "--pr", "9"], build).code, 2);
   const design = fakeGh({
     pr: { body: "", files: ["docs/features/demo/feature.md"], labels: [], head: "feature/demo/design" },
     features: [{ number: 1, title: "Feature: demo", body: renderParentBody({ name: "demo", slug: "demo", mode: "lite" }) }],
     states: lite(["po", "analyst"]),
+    prFiles: { "docs/features/demo/feature.md": frontmatter({ feature: 1, slug: "demo" }) },
   });
   const result = run(["gate-pr", "--pr", "9"], design);
   assert.equal(result.code, 0);

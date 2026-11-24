@@ -1,6 +1,7 @@
 # Feature lifecycle gate. Installed by init-repo with the lifecycle kit; a required check.
 # A pull request that closes a phase sub-issue, or touches docs/features/<slug>/, fails while an
-# earlier phase of that feature is open, unticked or in pushback. Any other pull request passes.
+# earlier phase of that feature is open, unticked or in pushback, or while a feature artefact or
+# ADR it touches has missing or wrong frontmatter. Any other pull request passes.
 # The only bypass is the gate-override label, with the reason in the Narrative sections.
 
 name: feature-gate

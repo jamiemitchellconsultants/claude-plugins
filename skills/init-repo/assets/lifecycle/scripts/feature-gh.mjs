@@ -67,8 +67,22 @@ export function makeGh(runner = runGh) {
     viewIssue,
 
     viewPr(number) {
-      const pr = json(["pr", "view", String(number), "--json", "body,files,labels,headRefName"]);
-      return { body: pr.body ?? "", files: (pr.files ?? []).map((f) => f.path), labels: labelNames(pr.labels), head: pr.headRefName ?? "" };
+      const pr = json(["pr", "view", String(number), "--json", "body,files,labels,headRefName,headRefOid"]);
+      const files = pr.files ?? [];
+      return {
+        body: pr.body ?? "",
+        files: files.map((f) => f.path),
+        deleted: files.filter((f) => f.changeType === "DELETED").map((f) => f.path),
+        labels: labelNames(pr.labels),
+        head: pr.headRefName ?? "",
+        headSha: pr.headRefOid ?? "",
+      };
+    },
+
+    // The gate runs on the base commit, so a PR's own files are read from GitHub at its head.
+    readPrFile(path, sha) {
+      const encoded = path.split("/").map(encodeURIComponent).join("/");
+      return runner(["api", "-H", "Accept: application/vnd.github.raw", `repos/{owner}/{repo}/contents/${encoded}?ref=${sha}`]);
     },
 
     loadFeature(number) {
