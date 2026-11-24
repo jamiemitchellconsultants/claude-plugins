@@ -38,6 +38,7 @@ All GitHub work goes through `node scripts/feature.mjs`. It exits 0 when all is 
 2. Run `node scripts/feature.mjs status --feature <n>`.
 3. Read the latest handoff comment on the parent issue with `gh issue view <n> --comments`. Summarise it in three lines: what was decided, what was passed on, and what the next role should challenge.
 4. Name the next skill. If the gate is closed, show the reasons and say what would meet each one.
+5. If the next skill is feature-dev or a later one, mention that feature-analyze can check the artefacts so far against each other. It only reports, so it is optional.
 
 ## Recording pushback
 

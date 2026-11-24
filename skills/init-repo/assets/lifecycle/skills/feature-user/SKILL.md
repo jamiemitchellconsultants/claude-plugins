@@ -22,7 +22,7 @@ You are wearing the user hat for one feature. Your phase id is user. Your artefa
 
 ### Good output
 
-Every behaviour has a scripted walkthrough and an executable acceptance test. Both have been run in a local build and in the deployed environment, and the results are recorded with dates and the name of the person who did each walkthrough.
+Every behaviour has a scripted walkthrough and an executable acceptance test. Every quality attribute has an acceptance check too, run in both environments. Both layers have been run in a local build and in the deployed environment, and the results are recorded with dates and the name of the person who did each walkthrough.
 
 ### Exit criteria
 
@@ -40,11 +40,13 @@ Run `node scripts/feature.mjs gate --feature <n> --phase user` and act on the re
 4. For each behaviour id, write two layers of acceptance:
    - a scripted walkthrough in `05-acceptance.md`: numbered steps, each with its expected result;
    - an executable acceptance test that automates the same scenario, in the repo's test suite and following its conventions.
-5. Run both layers in each environment: first in a local build, then in the deployed environment from the runbook. In each environment:
+5. For each quality attribute id, write an acceptance check: an executable check in the repo's test suite where the attribute can be measured (a load test, an accessibility scan, a security check), otherwise a scripted inspection with its expected result in `05-acceptance.md`.
+6. Run both layers, and the quality attribute checks, in each environment: first in a local build, then in the deployed environment from the runbook. In each environment:
    1. The person acting as user follows each walkthrough and says pass or fail for every step. Record the results.
    2. Once their walkthrough has passed, show them the executable test and ask them to approve it. Then run it and record the result.
-6. Record the results in `05-acceptance.md` for each behaviour in each environment: the walkthrough result, the executable result, the date, and the person who did the walkthrough.
-7. Do not fix a failure here. Raise pushback to the build with `node scripts/feature.mjs pushback --feature <n> --from user --to dev-build --body-file <file>`, or to an earlier phase if the behaviour itself is wrong. Then stop.
+   3. Follow each scripted inspection and say pass or fail, then run each executable quality attribute check. Record the results.
+7. Record the results in `05-acceptance.md` for each behaviour and quality attribute in each environment: for a behaviour, the walkthrough result, the executable result, the date, and the person who did the walkthrough; for a quality attribute, the kind of check, its result, the date and who ran it.
+8. Do not fix a failure here. Raise pushback to the build with `node scripts/feature.mjs pushback --feature <n> --from user --to dev-build --body-file <file>`, or to an earlier phase if the behaviour itself is wrong. Then stop.
 
 In lite mode, the build pull request carries the code. So run the deployed-environment layer after that pull request has merged, then tick its criterion.
 
