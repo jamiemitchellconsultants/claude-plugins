@@ -48,7 +48,7 @@ error.
 | `SideIssue` |  | A `GitHub` issue labelled `side-issue` that records something noticed during a `Feature` without working on it. Its body starts `Side issue of #<n>, noticed during <phase title>.`; it is never a sub-issue, so it does not affect the current `Phase`. |
 | `FeatureArtefact` |  | A generated document in `docs/features/<slug>/`: `01-vision.md`, `02-behaviours.md`, `03-architecture.md`, `05-runbook.md`, `05-user-guide.md`, `05-acceptance.md` in full mode, or the single `feature.md` in lite mode. |
 | `ArchitectureDecisionRecord` |  | An ADR written by the architect for each significant decision, at `docs/adr/NNNN-<title>.md` numbered across the whole repository, linked from `03-architecture.md` and from the PR's Narrative sections. |
-| `LifecycleKit` |  | The files `init-repo` owns and copies into a `TargetRepository`: every `PersonaSkill` plus the `feature` and `feature-park` skills (into `.claude/skills/`, `.agents/skills/` and `.kiro/skills/`), `scripts/feature*.mjs`, and `.github/workflows/feature-gate.yml`. |
+| `LifecycleKit` |  | The files `init-repo` owns and copies into a `TargetRepository`: every `PersonaSkill` plus the `feature`, `feature-park` and `feature-analyze` skills (into `.claude/skills/`, `.agents/skills/` and `.kiro/skills/`), `scripts/feature*.mjs`, and `.github/workflows/feature-gate.yml`. |
 
 ---
 

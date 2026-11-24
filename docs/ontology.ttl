@@ -234,7 +234,7 @@
 :LifecycleKit a owl:Class ;
     rdfs:subClassOf kit:Entity ;
     rdfs:label "LifecycleKit" ;
-    rdfs:comment "The files `init-repo` owns and copies into a `TargetRepository`: every `PersonaSkill` plus the `feature` and `feature-park` skills (into `.claude/skills/`, `.agents/skills/` and `.kiro/skills/`), `scripts/feature*.mjs`, and `.github/workflows/feature-gate.yml`." ;
+    rdfs:comment "The files `init-repo` owns and copies into a `TargetRepository`: every `PersonaSkill` plus the `feature`, `feature-park` and `feature-analyze` skills (into `.claude/skills/`, `.agents/skills/` and `.kiro/skills/`), `scripts/feature*.mjs`, and `.github/workflows/feature-gate.yml`." ;
     kit:invariant "is overwritten on every run of `init-files.mjs` (reported `updated`), unlike the rest of the `Baseline`; changes belong in this marketplace's assets." ;
     kit:definedIn "[design](superpowers/specs/2026-10-29-feature-lifecycle-design.md)" .
 
