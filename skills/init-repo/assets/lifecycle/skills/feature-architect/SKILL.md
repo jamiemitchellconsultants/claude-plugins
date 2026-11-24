@@ -46,7 +46,7 @@ Run `node scripts/feature.mjs gate --feature <n> --phase architect` and act on t
    - Deployment and runtime;
    - Traceability, a table from every behaviour id to its components (no row may be empty);
    - Decisions, which links to the ADRs.
-4. For each significant decision, write `docs/adr/NNNN-<title>.md` from `../feature/templates/adr.md`, numbering it after the highest existing file in `docs/adr/` (0001 if there are none). Link each ADR from `03-architecture.md` and from the pull request's Narrative sections.
+4. For each significant decision, write `docs/adr/NNNN-<title>.md` from `../feature/templates/adr.md`, numbering it after the highest existing file in `docs/adr/` (0001 if there are none). Link each ADR from `03-architecture.md` and from the pull request's Narrative sections. Fill in its frontmatter: `status` (proposed, accepted, superseded or deprecated), `date`, and `feature`, the parent issue number. When a new ADR replaces an earlier one, list the earlier number in the new ADR's `supersedes`, and set the earlier ADR's `status` to superseded and its `superseded-by` to the new number.
 5. Show the architecture, take the user's steering, and regenerate it until they accept it. Tick the exit criteria as they are met.
 
 ## Checkpoint

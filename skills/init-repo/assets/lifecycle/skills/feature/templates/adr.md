@@ -1,8 +1,12 @@
+---
+status: accepted
+date: <YYYY-MM-DD>
+feature: <parent issue number>
+---
+
 # NNNN — <decision title>
 
-- **Status:** accepted
-- **Date:** <YYYY-MM-DD>
-- **Feature:** #<parent issue> (docs/features/<slug>/)
+Feature: docs/features/<slug>/
 
 ## Context
 

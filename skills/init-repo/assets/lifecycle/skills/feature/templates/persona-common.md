@@ -20,6 +20,25 @@ Show the user this phase's exit criteria: the checklist on its sub-issue in full
 
 `node scripts/feature.mjs tick --feature <n> --phase <phase> --text "<the criterion, exactly as written>"`
 
+## Frontmatter
+
+Every feature artefact starts with a frontmatter block that holds only facts that never change. Progress stays on the issues, so never add a status, a phase-complete flag or a date here.
+
+```
+---
+feature: <n>
+slug: <slug>
+phase: <phase>
+sources: [<the earlier artefacts this one was generated from>]
+---
+```
+
+- `phase` is the phase that owns the file: po for `01-vision.md`, analyst for `02-behaviours.md`, architect for `03-architecture.md`, and user for the three `05-*.md` files.
+- `sources` lists the file names of the earlier artefacts this one was generated from, such as `[01-vision.md, 02-behaviours.md]`. The vision has none, so it has no `sources` key.
+- The lite `feature.md` holds only `feature` and `slug`, because it covers every phase.
+
+ADRs follow `../feature/templates/adr.md`. Run `node scripts/feature.mjs check-frontmatter --feature <n>` before every commit. It exits 2 and lists each problem when the frontmatter is missing or wrong. The required feature-gate check runs the same rules on the pull request.
+
 ## Staying on track
 
 When something outside this phase's job comes up, park it with the feature-park skill and carry straight on here. Do not chase it.
@@ -28,7 +47,7 @@ When something outside this phase's job comes up, park it with the feature-park 
 
 **Full mode.**
 1. Work on a branch named `feature/<slug>/<phase>`.
-2. Commit the artefact, following the repo's AGENTS.md (its ontology checks run before every commit).
+2. Run `node scripts/feature.mjs check-frontmatter --feature <n>` and fix what it reports by regenerating. Then commit the artefact, following the repo's AGENTS.md (its ontology checks run before every commit).
 3. Push, then open the pull request with `gh pr create --body-file <file>`. The body:
    - starts with `Closes #<sub-issue>`;
    - carries the three Narrative sections, and the pull request gets the narrative-required label, whenever the phase made a decision (the vision, behaviours, architecture and plan phases always do);

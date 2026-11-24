@@ -245,6 +245,116 @@ export function evaluateGate(state, phaseId) {
   return { open: reasons.length === 0, reasons };
 }
 
+// Frontmatter carries only facts that never change for a file. Progress stays on the issues,
+// so it cannot drift from a second copy here; an ADR's status is the one exception, since no
+// issue tracks it.
+
+export const ARTEFACT_PHASE = {
+  "01-vision.md": "po",
+  "02-behaviours.md": "analyst",
+  "03-architecture.md": "architect",
+  "05-runbook.md": "user",
+  "05-user-guide.md": "user",
+  "05-acceptance.md": "user",
+};
+
+export const ADR_STATUSES = ["proposed", "accepted", "superseded", "deprecated"];
+
+const FENCE = /^---\s*$/;
+const FIELD = /^([a-z][a-z-]*):\s*(.*?)\s*$/;
+const ADR_PATH = /^docs\/adr\/\d{4}-[^/]+\.md$/;
+
+export const isAdrPath = (path) => ADR_PATH.test(path);
+export const isArtefactName = (name) => name === "feature.md" || Object.hasOwn(ARTEFACT_PHASE, name);
+const ADR_ID = /^\d{4}$/;
+const DATE = /^\d{4}-\d{2}-\d{2}$/;
+
+const unquote = (value) => value.replace(/^(["'])(.*)\1$/, "$2");
+
+// A deliberately small YAML subset (key: scalar, key: [a, b]) so the kit needs no dependencies.
+export function parseFrontmatter(text) {
+  const lines = (text ?? "").split(/\r?\n/);
+  if (!FENCE.test(lines[0] ?? "")) return null;
+  const end = lines.findIndex((line, i) => i > 0 && FENCE.test(line));
+  if (end < 0) return { error: "the frontmatter has no closing --- line" };
+  const fields = {};
+  for (const [i, line] of lines.slice(1, end).entries()) {
+    if (!line.trim()) continue;
+    const m = line.match(FIELD);
+    if (!m) return { error: `frontmatter line ${i + 1} is not "key: value": ${line.trim()}` };
+    if (Object.hasOwn(fields, m[1])) return { error: `frontmatter sets ${m[1]} twice` };
+    const list = m[2].match(/^\[(.*)\]$/);
+    fields[m[1]] = list ? list[1].split(",").map((v) => unquote(v.trim())).filter(Boolean) : unquote(m[2]);
+  }
+  return { fields };
+}
+
+const asList = (value) => (value === undefined ? [] : Array.isArray(value) ? value : [value]);
+
+function readFields(path, text, allowed, expected) {
+  const parsed = parseFrontmatter(text);
+  if (parsed === null) return { reasons: [`${path} has no frontmatter. Start it with ${expected}.`] };
+  if (parsed.error) return { reasons: [`${path}: ${parsed.error}.`] };
+  const unknown = Object.keys(parsed.fields).filter((k) => !allowed.includes(k));
+  return { fields: parsed.fields, reasons: unknown.map((k) => `${path}: unknown key ${k} (allowed: ${allowed.join(", ")}).`) };
+}
+
+export function checkFeatureArtefact({ path, text, feature }) {
+  const name = path.slice(`docs/features/${feature.slug}/`.length);
+  if (!isArtefactName(name)) return [];
+  const lite = name === "feature.md";
+  const phaseId = ARTEFACT_PHASE[name];
+  const lines = [`feature: ${feature.number}`, `slug: ${feature.slug}`];
+  if (!lite) lines.push(`phase: ${phaseId}`);
+  if (phaseId && phaseId !== "po") lines.push("sources: [<the artefacts this one was generated from>]");
+  const regenerate = lite ? "" : `, by re-running the ${nextSkill(phaseId)} skill`;
+  const expected = `a --- block holding ${lines.join("; ")}${regenerate}`;
+  const allowed = lite ? ["feature", "slug"] : ["feature", "slug", "phase", "sources"];
+  const { fields, reasons } = readFields(path, text, allowed, expected);
+  if (!fields) return reasons;
+  const expect = (key, want) => {
+    if (fields[key] !== String(want)) reasons.push(`${path}: ${key} is ${fields[key] ?? "missing"}, expected ${want}.`);
+  };
+  expect("feature", feature.number);
+  expect("slug", feature.slug);
+  if (lite) return reasons;
+  expect("phase", phaseId);
+  const sources = asList(fields.sources);
+  if (phaseId === "po") {
+    if (sources.length > 0) reasons.push(`${path}: a po artefact has no sources; remove the sources key.`);
+    return reasons;
+  }
+  if (sources.length === 0) reasons.push(`${path}: sources must list the earlier artefacts it was generated from.`);
+  for (const source of sources) {
+    const from = ARTEFACT_PHASE[source];
+    if (!from || phaseIndex(from) >= phaseIndex(phaseId)) reasons.push(`${path}: source ${source} is not an earlier artefact of this feature.`);
+  }
+  return reasons;
+}
+
+export function checkAdr({ path, text, features }) {
+  if (!isAdrPath(path)) return [];
+  const expected = "a --- block holding status, date and feature, as the ADR template shows";
+  const { fields, reasons } = readFields(path, text, ["status", "date", "feature", "supersedes", "superseded-by"], expected);
+  if (!fields) return reasons;
+  if (!ADR_STATUSES.includes(fields.status)) {
+    reasons.push(`${path}: status is ${fields.status ?? "missing"}, expected one of ${ADR_STATUSES.join(", ")}.`);
+  }
+  if (!DATE.test(fields.date ?? "")) reasons.push(`${path}: date is ${fields.date ?? "missing"}, expected YYYY-MM-DD.`);
+  if (!features.map(String).includes(fields.feature)) {
+    reasons.push(`${path}: feature is ${fields.feature ?? "missing"}, expected ${features.map((n) => `#${n}`).join(" or ")}.`);
+  }
+  for (const id of asList(fields.supersedes)) {
+    if (!ADR_ID.test(id)) reasons.push(`${path}: supersedes entry ${id} is not a four-digit ADR number.`);
+  }
+  const by = fields["superseded-by"];
+  if (fields.status === "superseded" && !ADR_ID.test(by ?? "")) {
+    reasons.push(`${path}: a superseded ADR needs superseded-by, the four-digit number of the ADR that replaces it.`);
+  }
+  if (by !== undefined && fields.status !== "superseded") reasons.push(`${path}: only a superseded ADR has superseded-by.`);
+  return reasons;
+}
+
 export function classifyPr({ body, files, labels }) {
   const slugs = [...new Set(files.map((f) => f.match(FEATURE_PATH)?.[1]).filter(Boolean))].sort();
   const closes = [...new Set([...(body ?? "").matchAll(CLOSING)].map((m) => Number(m[1])))];

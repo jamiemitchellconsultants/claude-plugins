@@ -52,6 +52,6 @@ Use this when someone finds that an earlier phase's artefact is wrong or incompl
 ## Promoting a lite feature to full mode
 
 1. Run `node scripts/feature.mjs promote --feature <n>`. It creates the sub-issues, closes the ones whose sections are done, and lists the numbered files.
-2. On a branch named `feature/<slug>/promote`, generate each numbered file from its section of `feature.md` and remove `feature.md`.
+2. On a branch named `feature/<slug>/promote`, generate each numbered file from its section of `feature.md`, with the frontmatter that `templates/persona-common.md` describes, and remove `feature.md`. Run `node scripts/feature.mjs check-frontmatter --feature <n>` before committing.
 3. Open a pull request that explains the promotion, following the repo's AGENTS.md for the commit and the pull-request body.
 4. Stop at the checkpoint and name the next skill.
