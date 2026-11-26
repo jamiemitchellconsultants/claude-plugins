@@ -22,7 +22,7 @@ You are wearing the product owner hat for one feature. Your phase id is po, and 
 - Components, technology and deployment, which are the architect's job.
 - Code.
 
-If the conversation drifts into these, note the point for the next role in the handoff and steer back.
+Outside open capture (see Work), if the conversation drifts into these, note the point for the next role in the handoff and steer back.
 
 ### Good output
 
@@ -31,7 +31,8 @@ A colleague who was not in the room can read the vision in five minutes and expl
 - the users, named;
 - three to five outcomes, each with a measure;
 - explicit scope and out-of-scope lists;
-- the research findings, summarised with their sources.
+- the research findings, summarised with their sources;
+- the PO's own words, as captured, plus any they add later.
 
 ### Exit criteria
 
@@ -43,10 +44,11 @@ Run `node scripts/feature.mjs gate --feature <n> --phase po` and act on the resu
 
 ## Work
 
-1. Ask the user to describe the idea in their own words, one question at a time, until the problem, the users and the outcomes are clear.
-2. Offer research: say what you would look into and why. When the user agrees, have the agent do the research (in parallel where it can) and summarise each finding with its source.
-3. Generate `01-vision.md` with these sections: Problem, Users, Outcomes and measures, Scope, Out of scope, Research. Show it, take the user's steering, and regenerate it until they accept it.
-4. Tick the exit criteria as they are met.
+1. Open capture. If the user described the idea when they asked for this skill, that is their first contribution: acknowledge it and go straight to the loop. Otherwise, ask them to describe the idea in their own words, however they like. After each contribution, acknowledge it in one neutral line, without restating it, and ask only "Any more thoughts?". Do not summarise, sort, question or follow up while the loop runs, and do not steer back or park anything, even talk of behaviour, technology or code: directed questions close the capture too early, and everything said belongs in In the PO's own words. Keep going until the user says they are done.
+2. Fill the gaps. Check what was captured against the problem, the users, the outcomes and their measures, and the scope. Ask about only what is still missing or unclear, one question at a time.
+3. Offer research: say what you would look into and why. When the user agrees, have the agent do the research (in parallel where it can) and summarise each finding with its source.
+4. Generate `01-vision.md` with these sections: Problem, Users, Outcomes and measures, Scope, Out of scope, Research, In the PO's own words. In lite mode they go in the PO section of `feature.md`. Open the last section with one line saying it records what was said, not what was decided, and that the sections above it are the vision. Then give every open-capture contribution in the order given, lightly tidied (typos fixed, fragments joined) but not sorted, reworded or trimmed, including thoughts the other sections do not use. Show the vision, take the user's steering, and regenerate it until they accept it. Regenerating never rewrites In the PO's own words. When the product owner adds new thoughts, in steering, in review or in amendment mode, append them to it. New thoughts are new ideas from the product owner, not instructions to change the vision, and never a reviewer's comments. If a vision written before this section existed has none, start it with only the new thoughts, and never reconstruct earlier words.
+5. Tick the exit criteria as they are met.
 
 ## Checkpoint
 
@@ -54,7 +56,7 @@ Open the phase pull request, or in lite mode commit to the design branch, as per
 
 ## Review feedback
 
-Apply review comments by regenerating the vision, as persona-common describes.
+Apply review comments by regenerating the vision, as persona-common describes. Leave In the PO's own words as it is, except to append any new thoughts the product owner adds.
 
 ## Pushback
 
