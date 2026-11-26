@@ -9,6 +9,25 @@ import { fileURLToPath } from "node:url";
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SCRIPT = join(HERE, "../scripts/init-files.mjs");
 const KIT = join(HERE, "../assets/lifecycle");
+const BASELINE = join(HERE, "../assets/files/docs/architecture-baseline.md.dotnet");
+const PASCAL = /`([A-Z][A-Za-z0-9]*[a-z][A-Za-z0-9]*)`/g;
+
+// A stand-in installer checkout: a full run only checks that the file exists, and --dry-run never runs it.
+function installer(name, file) {
+  const dir = mkdtempSync(join(tmpdir(), `${name}-`));
+  mkdirSync(join(dir, "bin"));
+  writeFileSync(join(dir, "bin", file), "");
+  return dir;
+}
+
+function fullDryRun(dir, stack) {
+  return initFiles(
+    "--target", dir, "--name", "Demo", "--description", "A demo", "--owner", "someone", "--stack", stack,
+    "--narrative", installer("narrative", "narrative.mjs"),
+    "--ontology-kit", installer("ontology-kit", "install-ontology.mjs"),
+    "--dry-run",
+  );
+}
 
 const KIT_FILES = [
   ".claude/skills/feature-analyst/SKILL.md",
@@ -113,4 +132,46 @@ test("without skills-only the usual options are still required", () => {
   const { code, output } = initFiles("--target", repo());
   assert.equal(code, 1);
   assert.match(output, /--name is required/);
+});
+
+test("baseline is seeded for stack dotnet", () => {
+  const { code, output } = fullDryRun(repo(), "dotnet");
+  assert.equal(code, 0, output);
+  assert.match(output, /created\s+docs\/architecture-baseline\.md/);
+});
+
+test("baseline is not seeded for stack none", () => {
+  const { code, output } = fullDryRun(repo(), "none");
+  assert.equal(code, 0, output);
+  assert.doesNotMatch(output, /architecture-baseline/);
+});
+
+test("an existing baseline is kept", () => {
+  const dir = repo();
+  mkdirSync(join(dir, "docs"));
+  writeFileSync(join(dir, "docs/architecture-baseline.md"), "ours\n");
+  const { code, output } = fullDryRun(dir, "dotnet");
+  assert.equal(code, 0, output);
+  assert.match(output, /kept\s+docs\/architecture-baseline\.md/);
+});
+
+test("the seeded baseline has the three sections", () => {
+  const headings = readFileSync(BASELINE, "utf8").split("\n").filter((line) => line.startsWith("## "));
+  assert.deepEqual(headings, ["## Fixed", "## Per-environment adapters", "## Variable"]);
+});
+
+test("the seeded baseline records the house choices", () => {
+  const text = readFileSync(BASELINE, "utf8");
+  for (const needle of [
+    "Blazor WebAssembly", "PostgreSQL", "OIDC", "Entra", "Keycloak", "Terraform", "MinIO", "S3", "Lambda",
+    ".NET MAUI", "not MAUI Blazor Hybrid",
+    "Does anyone outside your own network need to try this before it goes live?",
+    "Do people need to install this from an app store, use phone features such as notifications, or use it without a connection?",
+  ]) {
+    assert.ok(text.includes(needle), needle);
+  }
+});
+
+test("the seeded baseline has no backticked PascalCase", () => {
+  assert.deepEqual([...readFileSync(BASELINE, "utf8").matchAll(PASCAL)].map((m) => m[1]), []);
 });

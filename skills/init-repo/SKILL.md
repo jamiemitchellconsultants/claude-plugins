@@ -55,6 +55,8 @@ reports each file as `created` or `kept` (`updated` for the kit). If `AGENTS.md`
 Narrative checkout (`~/RiderProjects/Narrative`, falls back to `npx` from GitHub) and the ontology
 kit checkout (`~/RiderProjects/InternalOntology`); override with `--narrative` / `--ontology-kit`.
 
+On an existing repo that already deploys somewhere, review the seeded `docs/architecture-baseline.md` with the user before the first feature reaches the architect, and change it to match what is built: it describes the house standard, not this repo.
+
 What it lays down, and why each piece exists:
 
 | Piece | Why |
@@ -64,6 +66,7 @@ What it lays down, and why each piece exists:
 | Ontology kit (installer) | `docs/ontology.ttl` is the source, `docs/ontology.md` is generated, and a CI term check stops vocabulary drifting. |
 | `ai-fingerprint.yml` + PR template footer | Every PR body carries a hash of the branch diff. Narrative proposal PRs opened by `github-actions[bot]` on `automation/narrative-pr-*` are exempt; the bot cannot know the hash and its later body edit does not re-run the check. |
 | `dotnet-build.yml` (.NET only) | Skips docs-only changes with `paths-ignore`, cancels superseded runs, `no-build-check` label as an opt-out. Deliberately not a required check: a path-filtered required check that never runs leaves a PR pending forever. |
+| `docs/architecture-baseline.md` (.NET only) | The house deployment standard (Blazor WebAssembly, PostgreSQL, OIDC, Docker locally, AWS with Terraform) that `feature-architect` starts from, so a user without architecture skills is asked only where a feature leaves it. Written only when missing; after that the repo owns it. |
 | `CODEOWNERS` | With branch protection, requires the owner's approval. |
 | Feature lifecycle kit | The persona skills (`feature`, `feature-po`, `feature-analyst`, `feature-architect`, `feature-dev`, `feature-user`, `feature-park`, `feature-analyze`) copied into `.claude/skills/`, `.agents/skills/` and `.kiro/skills/` so Claude Code, Codex, opencode and Kiro all find them; `scripts/feature*.mjs`, which hold every gate rule; and the `feature-gate` workflow. Unlike everything else here it is **overwritten** on each run (reported `updated`), because the copies must match this marketplace. opencode reads both `.claude/skills/` and `.agents/skills/`; the copies are identical and opencode keeps one per name (logging a duplicate warning), so this is harmless. |
 

@@ -66,10 +66,18 @@
 :Baseline a owl:Class ;
     rdfs:subClassOf kit:Entity ;
     rdfs:label "Baseline" ;
-    rdfs:comment "The standard set of pieces applied to a `TargetRepository`: `SteeringFile` and `PointerFile`s, `ProjectNarrative`, `OntologyKit`, the AI-fingerprint check, the .NET build workflow (for `Stack` dotnet only), CODEOWNERS, the `LifecycleKit`, and the `GitHub` settings." ;
+    rdfs:comment "The standard set of pieces applied to a `TargetRepository`: `SteeringFile` and `PointerFile`s, `ProjectNarrative`, `OntologyKit`, the AI-fingerprint check, the .NET build workflow (for `Stack` dotnet only), the `ArchitectureBaseline` (for `Stack` dotnet only), CODEOWNERS, the `LifecycleKit`, and the `GitHub` settings." ;
     kit:invariant "is applied by running the installers, never by copying another repository, so that installer-owned scripts stay current and no other project's Narrative history or ontology is carried over." ;
     kit:invariant "GitHub settings are applied only after the user has explicitly agreed, because they change shared state." ;
     kit:definedIn "[init-repo SKILL.md](../skills/init-repo/SKILL.md)" .
+
+:ArchitectureBaseline a owl:Class ;
+    rdfs:subClassOf kit:Entity ;
+    rdfs:label "ArchitectureBaseline" ;
+    rdfs:comment "The house deployment standard in a `TargetRepository`'s `docs/architecture-baseline.md`: its fixed choices, its per-environment adapters and its variable items, each with the plain-language question that decides it. feature-architect starts from it and asks only where a feature leaves it. Distinct from the `Baseline`, which is the set of pieces init-repo applies." ;
+    kit:invariant "is written by init-repo only when missing, and only for `Stack` dotnet; after that the repository owns and edits it." ;
+    kit:invariant "is a repository document, not a `FeatureArtefact`: it has no feature frontmatter, and a feature that departs from it records an ADR instead of changing it." ;
+    kit:definedIn "[design](superpowers/specs/2026-11-26-architect-baseline-design.md)" .
 
 :SteeringFile a owl:Class ;
     rdfs:subClassOf kit:Entity ;
