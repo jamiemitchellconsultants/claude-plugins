@@ -44,7 +44,7 @@ and the `feature-gate` check stops a phase starting before the one before it is 
 | Skill | Use it to |
 | --- | --- |
 | `feature` | Start a feature, see where it is, resume it, record pushback against an earlier phase, or promote a lite feature to full mode. The entry point. |
-| `feature-po` | Act as product owner: explore the idea, ask for research, set out the vision. |
+| `feature-po` | Act as product owner: hear the idea out in the owner's own words, fill the gaps, ask for research, set out the vision. |
 | `feature-analyst` | Act as analyst: turn the accepted vision into system behaviours and drive out uncertainty. |
 | `feature-architect` | Act as architect: define components, structure and deployment, and record architecture decisions. |
 | `feature-dev` | Act as developer: write implementation plans from the accepted vision, behaviours and architecture, then build from the approved plan. |

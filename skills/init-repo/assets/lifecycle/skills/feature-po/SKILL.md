@@ -31,7 +31,8 @@ A colleague who was not in the room can read the vision in five minutes and expl
 - the users, named;
 - three to five outcomes, each with a measure;
 - explicit scope and out-of-scope lists;
-- the research findings, summarised with their sources.
+- the research findings, summarised with their sources;
+- the PO's own words, as they gave them before any directed question.
 
 ### Exit criteria
 
@@ -43,10 +44,11 @@ Run `node scripts/feature.mjs gate --feature <n> --phase po` and act on the resu
 
 ## Work
 
-1. Ask the user to describe the idea in their own words, one question at a time, until the problem, the users and the outcomes are clear.
-2. Offer research: say what you would look into and why. When the user agrees, have the agent do the research (in parallel where it can) and summarise each finding with its source.
-3. Generate `01-vision.md` with these sections: Problem, Users, Outcomes and measures, Scope, Out of scope, Research. Show it, take the user's steering, and regenerate it until they accept it.
-4. Tick the exit criteria as they are met.
+1. Open capture. Ask the user to describe the idea in their own words, however they like. Anything they said when they asked for this skill is their first contribution. After each contribution, acknowledge it in one line and ask only "Any more thoughts?". Do not summarise, sort, question or follow up while the loop runs, because directed questions close the capture too early. Keep going until the user says they are done.
+2. Fill the gaps. Check what was captured against the problem, the users, the outcomes and their measures, and the scope. Ask about only what is still missing or unclear, one question at a time.
+3. Offer research: say what you would look into and why. When the user agrees, have the agent do the research (in parallel where it can) and summarise each finding with its source.
+4. Generate `01-vision.md` with these sections: Problem, Users, Outcomes and measures, Scope, Out of scope, Research, In the PO's own words. In lite mode they go in the PO section of `feature.md`. The last section holds every open-capture contribution in the order given, lightly tidied (typos fixed, fragments joined) but not sorted, reworded or trimmed, including thoughts the other sections do not use. Show the vision, take the user's steering, and regenerate it until they accept it. Regenerating never rewrites In the PO's own words: when the user adds new thoughts, in steering, in review or in amendment mode, append them to it.
+5. Tick the exit criteria as they are met.
 
 ## Checkpoint
 
@@ -54,7 +56,7 @@ Open the phase pull request, or in lite mode commit to the design branch, as per
 
 ## Review feedback
 
-Apply review comments by regenerating the vision, as persona-common describes.
+Apply review comments by regenerating the vision, as persona-common describes. Leave In the PO's own words as it is, except to append any new thoughts the product owner adds.
 
 ## Pushback
 

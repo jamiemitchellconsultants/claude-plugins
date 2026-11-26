@@ -8,6 +8,29 @@ test("po names its artefact", () => {
   assert.ok(readSkill("feature-po").includes("01-vision.md"));
 });
 
+test("po hears the idea out before asking directed questions", () => {
+  const work = section(readSkill("feature-po"), "## Work");
+  for (const needle of [
+    "Any more thoughts?",
+    "Do not summarise, sort, question or follow up",
+    "until the user says they are done",
+    "first contribution",
+  ]) {
+    assert.ok(work.includes(needle), needle);
+  }
+  assert.ok(work.indexOf("Any more thoughts?") < work.indexOf("one question at a time"), "open capture comes first");
+});
+
+test("po keeps the owner's own words in the vision", () => {
+  const text = readSkill("feature-po");
+  const work = section(text, "## Work");
+  for (const needle of ["In the PO's own words", "feature.md", "never rewrites In the PO's own words", "append"]) {
+    assert.ok(work.includes(needle), needle);
+  }
+  assert.match(section(text, "### Good output"), /own words/);
+  assert.match(section(text, "## Review feedback"), /In the PO's own words/);
+});
+
 test("analyst asks one question at a time and updates ontology", () => {
   const text = readSkill("feature-analyst");
   assert.ok(text.includes("02-behaviours.md"));
