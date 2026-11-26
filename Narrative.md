@@ -14,6 +14,7 @@ This document records what was asked, what was decided, why, and what followed.
 | [4](#entry-doc-comments-stable-behaviour-ids-and-the-dev-plan-folder-in-the-init-re) | 2026-11-23 | Doc comments, stable behaviour ids and the dev plan folder in the init-repo baseline | product | Require doc comments on every public type and member in the language's standard doc-comment format, with XML doc comments for C#, and make detailed-plan interfaces use that format. |
 | [5](#entry-feat-lifecycle-require-frontmatter-on-feature-artefacts-and-adrs) | 2026-11-24 | feat(lifecycle): require frontmatter on feature artefacts and ADRs | product | Require frontmatter that holds only facts that never change on feature artefacts, and frontmatter with status on ADRs, the one status no issue tracks. Enforce both in `feature-gate` and in a local `check-frontmatter` command. |
 | [6](#entry-feat-lifecycle-spec-kit-ideas-as-guidance-feature-analyze-quality-attrib) | 2026-11-24 | feat(lifecycle): Spec Kit ideas as guidance: feature-analyze, quality attributes, priority | product | Adopt the ideas as guidance, with no enforcement. - The consistency review is an advisory skill (`feature-analyze`), run when wanted and suggested once at the architect checkpoint. |
+| [7](#entry-feat-lifecycle-let-the-product-owner-talk-freely-before-directed-questio) | 2026-11-26 | feat(lifecycle): let the product owner talk freely before directed questions | product | Put an open "Any more thoughts?" loop before the directed questions, and keep the PO's words as an append-only last section of the vision. |
 
 ---
 
@@ -204,3 +205,29 @@ Deliberately left open:
 AI-Fingerprint: sha256:a7345219c9de
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+---
+
+<a id="entry-feat-lifecycle-let-the-product-owner-talk-freely-before-directed-questio"></a>
+
+## Entry 7 — 2026-11-26 — feat(lifecycle): let the product owner talk freely before directed questions
+
+*Kind: product. Status: accepted.*
+
+## Context
+
+The PO's first step asked directed questions until the problem, users and outcomes were clear. In practice those questions closed the vision capture too early: once the PO was answering "who are the users?", half-formed thoughts that fit no question were never said, and nothing kept what the PO said before it was sorted into the vision's sections.
+
+## Decision
+
+Put an open "Any more thoughts?" loop before the directed questions, and keep the PO's words as an append-only last section of the vision. We rejected keeping the raw words in the conversation only, because reviewers could not then check that nothing was lost. We also rejected a separate `00-raw-thoughts.md`, because it would touch the artefact list, the phase mapping, the frontmatter rules and their tests for little gain. The change is guidance only, with no new exit criterion, following the low-friction principle and the analyst-depth precedent.
+
+## Consequences
+
+Every target repo gets the loop on its next `init-repo` run. Visions get longer by one section, placed last so the five-minute read is not padded. Later roles read a section that is explicitly not the decided vision, so they must rely on the structured sections. What stays open: whether promotion from lite to full mode should protect the raw section, and whether contributions should be kept one entry each rather than joined.
+
+---
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+AI-Fingerprint: sha256:5c0d9ec46348
