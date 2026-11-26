@@ -6,7 +6,7 @@ This is the house deployment standard that the feature-architect skill starts fr
 
 - **Front end:** a Blazor WebAssembly standalone app, mobile first. On AWS it is hosted from S3 behind CloudFront.
 - **Service layer:** clean architecture. On AWS it runs in a container on ECS Fargate, unless Scaling says otherwise.
-- **Persistence:** PostgreSQL. On AWS, RDS for PostgreSQL with automated backups, kept for as long as the feature's data-retention quality attribute needs.
+- **Persistence:** PostgreSQL. On AWS, RDS for PostgreSQL with automated backups for point-in-time recovery. A data-retention quality attribute longer than the backup window is a separate need (snapshots or exports), so it is a question, not something this line covers.
 - **Sign-in:** OIDC, behind dependency injection so the identity provider can be swapped. Entra and Keycloak are preferred. Another provider may be specified where the users' accounts call for it.
 - **Environments:** local dev on Docker, always; the home lab, when Variable says so; production on AWS, scripted with Terraform.
 - **CI/CD:** GitHub Actions. Terraform plan runs on pull requests and apply runs on merge.

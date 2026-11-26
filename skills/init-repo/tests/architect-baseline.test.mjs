@@ -1,5 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { readSkill, section } from "./helpers/skill-text.mjs";
 
 const text = readSkill("feature-architect");
@@ -65,4 +66,39 @@ test("architect's departure ADR names the baseline line", () => {
 test("architect's role brief names the baseline", () => {
   assert.match(section(text, "### Cares about"), /architecture baseline/);
   assert.match(section(text, "### Good output"), /every departure from the baseline has an ADR/);
+});
+
+const BASELINE_ASSET = new URL("../assets/files/docs/architecture-baseline.md.dotnet", import.meta.url);
+const INIT_REPO_SKILL = new URL("../SKILL.md", import.meta.url);
+const shapeStep = () => work.slice(work.indexOf("3. Work out the rest of the shape")).split("\n")[0];
+
+test("architect counts infrastructure files in the repo as built", () => {
+  has(work, ["the infrastructure files already in the repo", "count as what is built"]);
+});
+
+test("init-repo asks for the seeded baseline to be reviewed on an existing repo", () => {
+  assert.ok(readFileSync(INIT_REPO_SKILL, "utf8").includes("review the seeded `docs/architecture-baseline.md` with the user"));
+});
+
+test("architect's shape questions share the deployment rules and budget", () => {
+  has(shapeStep(), ["the same rules as step 2", "share its budget of five", "do not reopen"]);
+});
+
+test("baseline separates backups from data retention", () => {
+  const text = readFileSync(BASELINE_ASSET, "utf8");
+  assert.ok(!text.includes("kept for as long as the feature's data-retention quality attribute needs"));
+  has(text, ["point-in-time recovery", "longer than the backup window"]);
+});
+
+test("architect suggests a baseline update only on a second feature", () => {
+  assert.ok(!work.includes("repeats a departure an earlier feature made"));
+  has(work, ["the same departure appears in a second feature"]);
+});
+
+test("architect supersedes an ADR the vision contradicts", () => {
+  has(work, ["contradicts an accepted ADR", "supersedes it"]);
+});
+
+test("architect's adapters table works without a baseline", () => {
+  has(work, ["or, with no baseline, the environments settled in step 2"]);
 });

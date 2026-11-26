@@ -55,6 +55,8 @@ reports each file as `created` or `kept` (`updated` for the kit). If `AGENTS.md`
 Narrative checkout (`~/RiderProjects/Narrative`, falls back to `npx` from GitHub) and the ontology
 kit checkout (`~/RiderProjects/InternalOntology`); override with `--narrative` / `--ontology-kit`.
 
+On an existing repo that already deploys somewhere, review the seeded `docs/architecture-baseline.md` with the user before the first feature reaches the architect, and change it to match what is built: it describes the house standard, not this repo.
+
 What it lays down, and why each piece exists:
 
 | Piece | Why |
