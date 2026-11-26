@@ -82,7 +82,7 @@ The rule, stated in the file, applies to any new dependency a behaviour brings i
 
 **Variable**, each with the plain-language question that decides it and what each answer produces:
 - the home lab: "Does anyone outside your own network need to try this before it goes live?" Yes: a home lab environment, Docker Compose on a home server behind a reverse proxy with TLS, reachable from the internet. No: local dev and production only.
-- mobile apps: asked when the vision or behaviours mention phones, offline use or app-store distribution. "Do people need to install this from an app store, use phone features such as the camera or notifications, or use it without a connection?" Yes: a .NET MAUI app (not MAUI Blazor Hybrid) calling the same service layer, alongside the web app. No: the mobile-first web app only.
+- mobile apps: asked when the vision or behaviours mention phones, offline use or app-store distribution. "Do people need to install this from an app store, use phone features such as notifications, or use it without a connection?" Yes: a .NET MAUI app (not MAUI Blazor Hybrid) calling the same service layer, alongside the web app. No: the mobile-first web app only.
 - system integrations: each one gets a local and AWS adapter pair proposed, and a question only when no pair fits.
 
 ### Deployment questions (feature-architect)
