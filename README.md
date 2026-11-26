@@ -47,7 +47,7 @@ and the `feature-gate` check stops a phase starting before the one before it is 
 | `feature` | Start a feature, see where it is, resume it, record pushback against an earlier phase, or promote a lite feature to full mode. The entry point. |
 | `feature-po` | Act as product owner: hear the idea out in the owner's own words, fill the gaps, ask for research, set out the vision. |
 | `feature-analyst` | Act as analyst: turn the accepted vision into system behaviours and drive out uncertainty. |
-| `feature-architect` | Act as architect: define components, structure and deployment, and record architecture decisions. |
+| `feature-architect` | Act as architect: start from the repo's architecture baseline, ask deployment questions drawn from the behaviours, define components and structure, and record architecture decisions. |
 | `feature-dev` | Act as developer: write implementation plans from the accepted vision, behaviours and architecture, then build from the approved plan. |
 | `feature-user` | Act as user: write the runbook and user guide, and run acceptance with scripted walkthroughs and executable tests locally and in the deployed environment. |
 | `feature-park` | Record something outside the current phase (a bug, an idea, a refactor) as a side issue instead of working on it now. |
