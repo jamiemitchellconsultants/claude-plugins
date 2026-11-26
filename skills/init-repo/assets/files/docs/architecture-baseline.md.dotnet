@@ -1,0 +1,30 @@
+# {{PROJECT_NAME}} architecture baseline
+
+This is the house deployment standard that the feature-architect skill starts from. It proposes everything under Fixed and Per-environment adapters without asking, and asks a question under Variable only when a feature's behaviours or quality attributes point at it. This repository owns this file: change it when the standard changes here, for example to target Azure or to drop the home lab. A feature that departs from it records an ADR in `docs/adr/` that names the line it departs from.
+
+## Fixed
+
+- **Front end:** a Blazor WebAssembly standalone app, mobile first. On AWS it is hosted from S3 behind CloudFront.
+- **Service layer:** clean architecture. On AWS it runs in a container on ECS Fargate, unless Scaling says otherwise.
+- **Persistence:** PostgreSQL. On AWS, RDS for PostgreSQL with automated backups, kept for as long as the feature's data-retention quality attribute needs.
+- **Sign-in:** OIDC, behind dependency injection so the identity provider can be swapped. Entra and Keycloak are preferred. Another provider may be specified where the users' accounts call for it.
+- **Environments:** local dev on Docker, always; the home lab, when Variable says so; production on AWS, scripted with Terraform.
+- **CI/CD:** GitHub Actions. Terraform plan runs on pull requests and apply runs on merge.
+- **Secrets:** .NET user-secrets or an `.env` file locally; AWS Secrets Manager in production.
+- **Scaling:** when the behaviours or quality attributes describe a usage pattern that suits it, such as low or bursty traffic, propose AWS Lambda for the service layer. Otherwise run one small Fargate service, and add redundancy only when an availability quality attribute calls for it.
+
+## Per-environment adapters
+
+Every external dependency sits behind an interface, with one implementation for local dev and the home lab and another for AWS. Apply the same rule to any new dependency a feature brings in, and add its row here once it becomes part of the standard.
+
+| Concern | Local dev and home lab | AWS |
+| --- | --- | --- |
+| Object storage | MinIO | S3 |
+| Logging (trace, info, warning, exception), through Serilog | a file | CloudWatch Logs, chosen by configuration |
+| Identity provider | Keycloak in a container | Entra or Keycloak, as the users' accounts decide |
+
+## Variable
+
+- **Home lab.** Ask: "Does anyone outside your own network need to try this before it goes live?" Yes: a home lab environment, Docker Compose on a home server behind a reverse proxy with TLS, reachable from the internet. No: local dev and production only.
+- **Mobile apps.** Ask when the vision or behaviours mention phones, offline use or app-store distribution: "Do people need to install this from an app store, use phone features such as notifications, or use it without a connection?" Yes: a .NET MAUI app (not MAUI Blazor Hybrid) calling the same service layer, alongside the web app. No: the mobile-first web app only.
+- **System integrations.** For each external system a behaviour touches, propose a local and an AWS adapter pair. Ask only when no pair fits.

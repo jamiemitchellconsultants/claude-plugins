@@ -66,7 +66,7 @@
 :Baseline a owl:Class ;
     rdfs:subClassOf kit:Entity ;
     rdfs:label "Baseline" ;
-    rdfs:comment "The standard set of pieces applied to a `TargetRepository`: `SteeringFile` and `PointerFile`s, `ProjectNarrative`, `OntologyKit`, the AI-fingerprint check, the .NET build workflow (for `Stack` dotnet only), CODEOWNERS, the `LifecycleKit`, and the `GitHub` settings." ;
+    rdfs:comment "The standard set of pieces applied to a `TargetRepository`: `SteeringFile` and `PointerFile`s, `ProjectNarrative`, `OntologyKit`, the AI-fingerprint check, the .NET build workflow (for `Stack` dotnet only), the `ArchitectureBaseline` (for `Stack` dotnet only), CODEOWNERS, the `LifecycleKit`, and the `GitHub` settings." ;
     kit:invariant "is applied by running the installers, never by copying another repository, so that installer-owned scripts stay current and no other project's Narrative history or ontology is carried over." ;
     kit:invariant "GitHub settings are applied only after the user has explicitly agreed, because they change shared state." ;
     kit:definedIn "[init-repo SKILL.md](../skills/init-repo/SKILL.md)" .

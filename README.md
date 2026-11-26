@@ -27,6 +27,7 @@ Run `/init-repo` in a new or existing repository, or ask for "the usual setup". 
 | [Ontology kit](https://github.com/jamiemitchellconsultants/InternalOntology) | `docs/ontology.ttl` is the vocabulary source, `docs/ontology.md` is generated from it, and a CI check stops domain terms drifting. |
 | AI-fingerprint check | Every PR body carries a hash of the branch diff, checked in CI. |
 | .NET build workflow | Optional (`--stack none` skips it). Ignores docs-only changes and cancels superseded runs. |
+| Architecture baseline | .NET only. `docs/architecture-baseline.md`, the house deployment standard that `feature-architect` starts from. Written once; after that the repo owns it. |
 | `CODEOWNERS` | Combined with branch protection, the code owner must approve every PR. |
 | Feature lifecycle kit | The persona skills below, their gate scripts and the `feature-gate` workflow. |
 | GitHub settings (opt-in) | Labels, Actions permissions, and protection on `main`: PR required, one code-owner approval, `ai-fingerprint` and `feature-gate` required, admin override kept, no force-push or deletion. |
